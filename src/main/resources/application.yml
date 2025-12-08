@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: speech-calendar-assistant
+
+azure:
+  activedirectory:
+    tenant-id: ${AZURE_TENANT_ID}
+    client-id: ${AZURE_CLIENT_ID}
+    client-secret: ${AZURE_CLIENT_SECRET}
+  keyvault:
+    uri: ${AZURE_KEY_VAULT_URI}
+    enabled: true
+  speech:
+    key: ${AZURE_SPEECH_KEY:}
+    region: ${AZURE_SPEECH_REGION:}
+  luis:
+    endpoint: https://${AZURE_LUIS_REGION}.api.cognitive.microsoft.com
+    app-id: ${AZURE_LUIS_APP_ID}
+    key: ${AZURE_LUIS_KEY}
+    region: ${AZURE_LUIS_REGION}
+  application-insights:
+    instrumentation-key: ${APPLICATIONINSIGHTS_INSTRUMENTATION_KEY:}
+    connection-string: ${APPLICATIONINSIGHTS_CONNECTION_STRING:}
+
+microsoft:
+  graph:
+    scope: https://graph.microsoft.com/.default
+    endpoint: https://graph.microsoft.com/v1.0
+
+logging:
+  level:
+    com.aibooking: INFO
+    com.microsoft.graph: DEBUG
+    com.azure: DEBUG
+
