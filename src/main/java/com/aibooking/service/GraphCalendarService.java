@@ -1,6 +1,7 @@
 package com.aibooking.service;
 
 import com.aibooking.dto.ExtractedEntities;
+import com.microsoft.graph.core.DateOnly;
 import com.microsoft.graph.models.*;
 import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.GraphServiceClient;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -33,12 +35,12 @@ public class GraphCalendarService {
             event.body.content = "Meeting created via speech assistant";
 
             // Set start and end times
-            LocalDateTime start = entities.getStartDateTime() != null 
-                ? entities.getStartDateTime() 
-                : LocalDateTime.now().plusHours(1);
-            LocalDateTime end = entities.getEndDateTime() != null 
-                ? entities.getEndDateTime() 
-                : start.plusHours(1);
+            LocalDateTime start = entities.getStartDateTime() != null
+                    ? entities.getStartDateTime()
+                    : LocalDateTime.now().plusHours(1);
+            LocalDateTime end = entities.getEndDateTime() != null
+                    ? entities.getEndDateTime()
+                    : start.plusHours(1);
 
             event.start = new DateTimeTimeZone();
             event.start.dateTime = start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -80,7 +82,8 @@ public class GraphCalendarService {
             log.info("Event created successfully: {}", createdEvent.id);
 
             // Handle exceptions if recurrence exists
-            if (createdEvent.recurrence != null && entities.getExceptions() != null && !entities.getExceptions().isEmpty()) {
+            if (createdEvent.recurrence != null && entities.getExceptions() != null
+                    && !entities.getExceptions().isEmpty()) {
                 applyExceptions(createdEvent.id, entities, userId);
             }
 
@@ -105,7 +108,7 @@ public class GraphCalendarService {
         } else if (recurrenceText.contains("weekly")) {
             pattern.type = RecurrencePatternType.WEEKLY;
             pattern.interval = 1;
-            
+
             // Extract days of week
             List<DayOfWeek> daysOfWeek = new ArrayList<>();
             if (recurrenceText.contains("monday") || recurrenceText.contains("weekday")) {
@@ -129,7 +132,7 @@ public class GraphCalendarService {
             if (recurrenceText.contains("sunday")) {
                 daysOfWeek.add(DayOfWeek.SUNDAY);
             }
-            
+
             if (!daysOfWeek.isEmpty()) {
                 pattern.daysOfWeek = daysOfWeek;
             }
@@ -144,11 +147,15 @@ public class GraphCalendarService {
 
         // Set range (default: 6 months)
         range.type = RecurrenceRangeType.END_DATE;
-        LocalDateTime startDate = entities.getStartDateTime() != null 
-            ? entities.getStartDateTime() 
-            : LocalDateTime.now();
-        range.startDate = startDate.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        range.endDate = startDate.plusMonths(6).toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        LocalDateTime startDate = entities.getStartDateTime() != null
+                ? entities.getStartDateTime()
+                : LocalDateTime.now();
+        LocalDate startLocalDate = startDate.toLocalDate();
+        LocalDate endLocalDate = startDate.plusMonths(6).toLocalDate();
+        range.startDate = new DateOnly(startLocalDate.getYear(), startLocalDate.getMonthValue(),
+                startLocalDate.getDayOfMonth());
+        range.endDate = new DateOnly(endLocalDate.getYear(), endLocalDate.getMonthValue(),
+                endLocalDate.getDayOfMonth());
 
         recurrence.pattern = pattern;
         recurrence.range = range;
@@ -159,7 +166,7 @@ public class GraphCalendarService {
     private void applyExceptions(String eventId, ExtractedEntities entities, String userId) {
         try {
             String userPath = userId != null ? "users/" + userId : "me";
-            
+
             // Get all instances of the recurring event
             EventCollectionPage instances = graphServiceClient
                     .users(userPath)
@@ -203,7 +210,7 @@ public class GraphCalendarService {
 
         for (String exception : exceptions) {
             String exc = exception.toLowerCase();
-            
+
             // Check for "second Tuesday", "first Monday", etc.
             if (exc.contains("second") && dayOfWeek.contains("tuesday")) {
                 int weekOfMonth = (instanceStart.getDayOfMonth() - 1) / 7 + 1;
@@ -211,14 +218,14 @@ public class GraphCalendarService {
                     return true;
                 }
             }
-            
+
             if (exc.contains("first") && dayOfWeek.contains("monday")) {
                 int weekOfMonth = (instanceStart.getDayOfMonth() - 1) / 7 + 1;
                 if (weekOfMonth == 1) {
                     return true;
                 }
             }
-            
+
             // Check for specific days
             if (exc.contains("monday") && dayOfWeek.contains("monday")) {
                 return true;
@@ -268,21 +275,21 @@ public class GraphCalendarService {
     public void updateEvent(String eventId, ExtractedEntities entities, String userId) {
         try {
             String userPath = userId != null ? "users/" + userId : "me";
-            
+
             Event event = new Event();
-            
+
             if (entities.getStartDateTime() != null) {
                 event.start = new DateTimeTimeZone();
                 event.start.dateTime = entities.getStartDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 event.start.timeZone = ZoneId.systemDefault().getId();
             }
-            
+
             if (entities.getEndDateTime() != null) {
                 event.end = new DateTimeTimeZone();
                 event.end.dateTime = entities.getEndDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 event.end.timeZone = ZoneId.systemDefault().getId();
             }
-            
+
             if (entities.getSubject() != null) {
                 event.subject = entities.getSubject();
             }
@@ -304,14 +311,14 @@ public class GraphCalendarService {
     public List<Event> findEvents(String subject, LocalDateTime startDate, LocalDateTime endDate, String userId) {
         try {
             String userPath = userId != null ? "users/" + userId : "me";
-            
+
             String filter = "";
             if (startDate != null && endDate != null) {
                 filter = String.format("start/dateTime ge '%s' and start/dateTime le '%s'",
                         startDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                         endDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             }
-            
+
             EventCollectionPage events = graphServiceClient
                     .users(userPath)
                     .calendar()
@@ -322,7 +329,8 @@ public class GraphCalendarService {
 
             List<Event> matchingEvents = new ArrayList<>();
             for (Event event : events.getCurrentPage()) {
-                if (subject == null || (event.subject != null && event.subject.toLowerCase().contains(subject.toLowerCase()))) {
+                if (subject == null
+                        || (event.subject != null && event.subject.toLowerCase().contains(subject.toLowerCase()))) {
                     matchingEvents.add(event);
                 }
             }
@@ -334,4 +342,3 @@ public class GraphCalendarService {
         }
     }
 }
-
