@@ -13,9 +13,9 @@
     </parent>
 
     <groupId>com.bestbuy.schedulehub</groupId>
-    <artifactId>speech-calendar-assistant</artifactId>
+    <artifactId>schedule-hub</artifactId>
     <version>1.0.0</version>
-    <name>Speech Calendar Assistant</name>
+    <name>Schedule Hub</name>
     <description>Speech-driven Outlook Calendar Schedule assistant</description>
 
     <properties>

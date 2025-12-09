@@ -1,6 +1,6 @@
 # Complete Azure Setup Guide
 
-This guide provides step-by-step instructions for setting up all Azure resources required for the Speech Calendar Assistant.
+This guide provides step-by-step instructions for setting up all Azure resources required for the Schedule Hub.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ This guide provides step-by-step instructions for setting up all Azure resources
 
 **Configuration:**
 
-- **Name**: `SpeechCalendarAssistant`
+- **Name**: `ScheduleHub`
 - **Supported account types**:
   - For single tenant: `Accounts in this organizational directory only`
   - For multi-tenant: `Accounts in any organizational directory`
@@ -38,7 +38,7 @@ This guide provides step-by-step instructions for setting up all Azure resources
 
 1. In your app registration, go to **Certificates & secrets**
 2. Click **New client secret**
-3. **Description**: `Speech Calendar Assistant Secret`
+3. **Description**: `Schedule Hub Secret`
 4. **Expires**: Choose 12 or 24 months
 5. Click **Add**
 6. **IMPORTANT**: Copy the **Value** immediately (it won't be shown again)
@@ -66,7 +66,7 @@ az login
 
 # Create app registration
 az ad app create `
-  --display-name "SpeechCalendarAssistant" `
+  --display-name "ScheduleHub" `
   --web-redirect-uris "http://localhost:8080" `
   --required-resource-accesses @manifest.json
 
@@ -97,7 +97,7 @@ az ad app permission admin-consent --id <app-id>
   - Create new: `speech-calendar-rg`
   - Or use existing
 - **Region**: Choose closest (e.g., `eastus`, `westus2`)
-- **Name**: `speech-calendar-assistant` (must be globally unique)
+- **Name**: `schedule-hub` (must be globally unique)
 - **Pricing tier**:
   - `F0` - Free (5 hours/month, limited features)
   - `S0` - Standard (pay-as-you-go)
@@ -118,7 +118,7 @@ In PowerShell:
 
 ```powershell
 az cognitiveservices account create `
-  --name speech-calendar-assistant `
+  --name schedule-hub `
   --resource-group speech-calendar-rg `
   --kind SpeechServices `
   --sku F0 `
@@ -126,7 +126,7 @@ az cognitiveservices account create `
 
 # Get keys
 az cognitiveservices account keys list `
-  --name speech-calendar-assistant `
+  --name schedule-hub `
   --resource-group speech-calendar-rg
 ```
 
@@ -141,7 +141,7 @@ az cognitiveservices account keys list `
    - **Subscription**: Your subscription
    - **Resource group**: `speech-calendar-rg`
    - **Region**: Same as Speech Service (e.g., `eastus`)
-   - **Name**: `SpeechCalendarAssistant-CLU` (must be globally unique)
+   - **Name**: `ScheduleHub-CLU` (must be globally unique)
    - **Pricing tier**: `F0` (Free) or `S0` (Standard)
 5. Click **Review + create** > **Create**
 
@@ -161,7 +161,7 @@ az cognitiveservices account keys list `
 4. Click **Conversational language understanding**
 5. Follow the detailed configuration in `CLU_CONFIGURATION.md`
 6. Note:
-   - **Project Name**: `SpeechCalendarAssistant`
+   - **Project Name**: `ScheduleHub`
    - **Deployment Name**: `production` (or your preferred name)
 
 ## 4. Azure Key Vault
@@ -333,7 +333,7 @@ AZURE_SPEECH_KEY = <your-speech-key>
 AZURE_SPEECH_REGION = eastus
 AZURE_CLU_RESOURCE_NAME = <your-resource-name>
 AZURE_CLU_KEY = <your-clu-key>
-AZURE_CLU_PROJECT_NAME = SpeechCalendarAssistant
+AZURE_CLU_PROJECT_NAME = ScheduleHub
 AZURE_CLU_DEPLOYMENT_NAME = production
 AZURE_CLU_API_VERSION = 2022-05-01
 APPLICATIONINSIGHTS_INSTRUMENTATION_KEY = <your-instrumentation-key>
@@ -383,7 +383,7 @@ az webapp config appsettings set `
     AZURE_SPEECH_REGION="eastus" `
     AZURE_CLU_RESOURCE_NAME="<resource-name>" `
     AZURE_CLU_KEY="<clu-key>" `
-    AZURE_CLU_PROJECT_NAME="SpeechCalendarAssistant" `
+    AZURE_CLU_PROJECT_NAME="ScheduleHub" `
     AZURE_CLU_DEPLOYMENT_NAME="production" `
     AZURE_CLU_API_VERSION="2022-05-01"
 ```

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-This guide will help you get the Speech Calendar Assistant up and running quickly.
+This guide will help you get the Schedule Hub up and running quickly.
 
 ## Prerequisites
 
@@ -49,7 +49,7 @@ server:
 
 spring:
   application:
-    name: speech-calendar-assistant
+    name: schedule-hub
 
 azure:
   activedirectory:
@@ -66,7 +66,7 @@ azure:
   clu:
     endpoint: https://your-resource-name.cognitiveservices.azure.com
     key: your-clu-key
-    project-name: SpeechCalendarAssistant
+    project-name: ScheduleHub
     deployment-name: production
     api-version: 2022-05-01
   application-insights:

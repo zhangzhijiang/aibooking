@@ -1,6 +1,6 @@
 # Azure CLU (Conversational Language Understanding) Configuration Guide
 
-This document provides detailed instructions for configuring Azure CLU for the Speech Calendar Assistant.
+This document provides detailed instructions for configuring Azure CLU for the Schedule Hub.
 
 ## Overview
 
@@ -24,7 +24,7 @@ CLU (Conversational Language Understanding) is used to extract intents and entit
    - **Subscription**: Your subscription
    - **Resource Group**: Create new or use existing
    - **Region**: Choose a region (e.g., East US, West US 2)
-   - **Name**: `SpeechCalendarAssistant-CLU` (or your preferred name)
+   - **Name**: `ScheduleHub-CLU` (or your preferred name)
    - **Pricing Tier**: Choose Free (F0) for testing or Standard (S) for production
 5. Click **Review + create**, then **Create**
 6. Once deployed, go to the resource and note:
@@ -39,7 +39,7 @@ CLU (Conversational Language Understanding) is used to extract intents and entit
 4. Click **Conversational language understanding** in the left menu
 5. Click **Create new project**
 6. Enter project details:
-   - **Name**: `SpeechCalendarAssistant`
+   - **Name**: `ScheduleHub`
    - **Description**: `Speech-driven calendar Schedule assistant`
    - **Language**: `English`
 7. Click **Create project**
@@ -171,7 +171,7 @@ azure:
   clu:
     endpoint: https://<your-resource-name>.cognitiveservices.azure.com
     key: <your-key>
-    project-name: SpeechCalendarAssistant
+    project-name: ScheduleHub
     deployment-name: production
     api-version: 2022-05-01
 ```

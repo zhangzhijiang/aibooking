@@ -5,12 +5,15 @@
 **Issue:** Line 18 in `pom.xml` has `<n>` instead of `<name>`.
 
 **Fix:** Manually edit `pom.xml` and change:
+
 ```xml
-<n>Speech Calendar Assistant</n>
+<n>Schedule Hub</n>
 ```
+
 to:
+
 ```xml
-<name>Speech Calendar Assistant</name>
+<name>Schedule Hub</name>
 ```
 
 **Impact:** This is a cosmetic issue and doesn't affect functionality. Maven will work fine, but the project name won't be properly set.
@@ -23,4 +26,3 @@ to:
 2. Test dependencies (mockwebserver) are included
 3. All code compiles without errors
 4. All tests are properly structured
-

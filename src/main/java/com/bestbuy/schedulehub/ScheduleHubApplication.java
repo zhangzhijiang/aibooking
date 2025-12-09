@@ -6,9 +6,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication
 @EnableConfigurationProperties
-public class SpeechCalendarAssistantApplication {
+public class ScheduleHubApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpeechCalendarAssistantApplication.class, args);
+        SpringApplication.run(ScheduleHubApplication.class, args);
     }
 }
+

@@ -1,6 +1,6 @@
 # Speech-Driven Outlook Calendar Schedule Assistant
 
-A complete Java Spring Boot application that enables users to schedule meetings in Microsoft Outlook Calendar using speech input. The system integrates Azure Speech Services, CLU (Conversational Language Understanding), and Microsoft Graph API.
+A complete Java Spring Boot application that enables users to schedule meetings in Microsoft Outlook Calendar using speech input. Schedule Hub provides a unified interface for managing calendar events through natural language. The system integrates Azure Speech Services, CLU (Conversational Language Understanding), and Microsoft Graph API.
 
 ## Features
 
@@ -47,7 +47,7 @@ A complete Java Spring Boot application that enables users to schedule meetings 
 2. Navigate to **Azure Active Directory** > **App registrations**
 3. Click **New registration**
 4. Configure:
-   - **Name**: `SpeechCalendarAssistant`
+   - **Name**: `ScheduleHub`
    - **Supported account types**: Accounts in this organizational directory only
    - **Redirect URI**: `http://localhost:8080` (for local testing)
 5. Click **Register**
@@ -67,7 +67,7 @@ A complete Java Spring Boot application that enables users to schedule meetings 
    - **Subscription**: Your subscription
    - **Resource group**: Create new or use existing
    - **Region**: Choose closest region (e.g., `eastus`)
-   - **Name**: `speech-calendar-assistant`
+   - **Name**: `schedule-hub`
    - **Pricing tier**: F0 (Free) or S0 (Standard)
 3. Click **Create**
 4. Go to the resource > **Keys and Endpoint**
@@ -78,7 +78,7 @@ A complete Java Spring Boot application that enables users to schedule meetings 
 1. Go to [Language Studio](https://language.cognitive.azure.com/)
 2. Create a new **Language** resource in Azure Portal if you haven't already
 3. Sign in to Language Studio with your Azure account
-4. Create a new CLU project: **SpeechCalendarAssistant**
+4. Create a new CLU project: **ScheduleHub**
 5. Configure intents:
    - `BookMeeting`
    - `CancelMeeting`
@@ -153,7 +153,7 @@ server:
 
 spring:
   application:
-    name: speech-calendar-assistant
+    name: schedule-hub
 
 azure:
   activedirectory:
@@ -170,7 +170,7 @@ azure:
   clu:
     endpoint: https://your-resource-name.cognitiveservices.azure.com
     key: your-clu-key
-    project-name: SpeechCalendarAssistant
+    project-name: ScheduleHub
     deployment-name: production
     api-version: 2022-05-01
   application-insights:
@@ -274,7 +274,7 @@ az webapp deploy `
   --resource-group <resource-group> `
   --name speech-calendar-app `
   --type jar `
-  --src-path target/speech-calendar-assistant-1.0.0.jar
+  --src-path target/schedule-hub-1.0.0.jar
 ```
 
 **Note:** Use backtick `` ` `` for line continuation in PowerShell. In Command Prompt, you can use `^` but PowerShell is recommended for Azure CLI.
@@ -294,7 +294,7 @@ az webapp config appsettings set `
     AZURE_SPEECH_REGION="eastus" `
     AZURE_CLU_RESOURCE_NAME="<resource-name>" `
     AZURE_CLU_KEY="<clu-key>" `
-    AZURE_CLU_PROJECT_NAME="SpeechCalendarAssistant" `
+    AZURE_CLU_PROJECT_NAME="ScheduleHub" `
     AZURE_CLU_DEPLOYMENT_NAME="production" `
     AZURE_CLU_API_VERSION="2022-05-01"
 ```
@@ -310,7 +310,7 @@ schedulehub/
 │   │   │   ├── controller/      # REST controllers
 │   │   │   ├── dto/             # Data transfer objects
 │   │   │   ├── service/         # Business logic services
-│   │   │   └── SpeechCalendarAssistantApplication.java
+│   │   │   └── ScheduleHubApplication.java
 │   │   └── resources/
 │   │       ├── static/          # Frontend HTML/JS
 │   │       └── application.yml

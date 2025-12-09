@@ -26,7 +26,7 @@ schedulehub/
 │   │   │   │   ├── GraphCalendarService.java # Graph API integration
 │   │   │   │   ├── KeyVaultService.java   # Key Vault integration
 │   │   │   │   └── CluService.java       # CLU NLP integration
-│   │   │   └── SpeechCalendarAssistantApplication.java
+│   │   │   └── ScheduleHubApplication.java
 │   │   └── resources/
 │   │       ├── static/                    # Frontend files
 │   │       │   ├── index.html            # Web UI
@@ -196,7 +196,7 @@ mvn spring-boot:run
 
 ```cmd
 mvn clean package
-az webapp deploy --resource-group <rg> --name <app-name> --type jar --src-path target/speech-calendar-assistant-1.0.0.jar
+az webapp deploy --resource-group <rg> --name <app-name> --type jar --src-path target/schedule-hub-1.0.0.jar
 ```
 
 ## Documentation Files

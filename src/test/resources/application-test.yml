@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: speech-calendar-assistant-test
+    name: schedule-hub-test
 
 azure:
   activedirectory:
