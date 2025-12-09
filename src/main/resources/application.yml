@@ -1,26 +1,31 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: speech-calendar-assistant
 
 azure:
   activedirectory:
-    tenant-id: ${AZURE_TENANT_ID}
-    client-id: ${AZURE_CLIENT_ID}
-    client-secret: ${AZURE_CLIENT_SECRET}
+    tenant-id: your-tenant-id
+    client-id: your-client-id
+    client-secret: your-client-secret
+    authority: https://login.microsoftonline.com/your-tenant-id
   keyvault:
-    uri: ${AZURE_KEY_VAULT_URI}
+    uri: https://your-keyvault.vault.azure.net/
     enabled: true
   speech:
-    key: ${AZURE_SPEECH_KEY:}
-    region: ${AZURE_SPEECH_REGION:}
-  luis:
-    endpoint: https://${AZURE_LUIS_REGION}.api.cognitive.microsoft.com
-    app-id: ${AZURE_LUIS_APP_ID}
-    key: ${AZURE_LUIS_KEY}
-    region: ${AZURE_LUIS_REGION}
+    key: your-speech-key
+    region: eastus
+  clu:
+    endpoint: https://your-resource-name.cognitiveservices.azure.com
+    key: your-clu-key
+    project-name: SpeechCalendarAssistant
+    deployment-name: production
+    api-version: 2022-05-01
   application-insights:
-    instrumentation-key: ${APPLICATIONINSIGHTS_INSTRUMENTATION_KEY:}
-    connection-string: ${APPLICATIONINSIGHTS_CONNECTION_STRING:}
+    instrumentation-key: # Optional: your-instrumentation-key
+    connection-string: # Optional: your-connection-string
 
 microsoft:
   graph:
@@ -29,7 +34,6 @@ microsoft:
 
 logging:
   level:
-    com.aibooking: INFO
+    com.bestbuy.schedulehub: INFO
     com.microsoft.graph: DEBUG
     com.azure: DEBUG
-

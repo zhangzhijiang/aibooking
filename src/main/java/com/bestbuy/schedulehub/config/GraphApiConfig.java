@@ -1,4 +1,4 @@
-package com.aibooking.config;
+package com.bestbuy.schedulehub.config;
 
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
@@ -18,12 +18,11 @@ public class GraphApiConfig {
 
     @Bean
     public GraphServiceClient<Request> graphServiceClient(TokenCredential tokenCredential) {
-        TokenCredentialAuthProvider authProvider = 
-            new TokenCredentialAuthProvider(List.of(graphScope), tokenCredential);
-        
+        TokenCredentialAuthProvider authProvider = new TokenCredentialAuthProvider(List.of(graphScope),
+                tokenCredential);
+
         return GraphServiceClient.builder()
                 .authenticationProvider(authProvider)
                 .buildClient();
     }
 }
-

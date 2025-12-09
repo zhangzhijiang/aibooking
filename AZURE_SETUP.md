@@ -17,11 +17,12 @@ This guide provides step-by-step instructions for setting up all Azure resources
 3. Click **New registration**
 
 **Configuration:**
+
 - **Name**: `SpeechCalendarAssistant`
-- **Supported account types**: 
+- **Supported account types**:
   - For single tenant: `Accounts in this organizational directory only`
   - For multi-tenant: `Accounts in any organizational directory`
-- **Redirect URI**: 
+- **Redirect URI**:
   - Type: `Web`
   - URI: `http://localhost:8080` (for local development)
   - Add another: `https://<your-app-service>.azurewebsites.net` (for production)
@@ -29,6 +30,7 @@ This guide provides step-by-step instructions for setting up all Azure resources
 4. Click **Register**
 
 **Note down:**
+
 - **Application (client) ID**: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
 - **Directory (tenant) ID**: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
 
@@ -56,14 +58,16 @@ This guide provides step-by-step instructions for setting up all Azure resources
 
 ### Azure CLI Alternative
 
-```bash
+In PowerShell (recommended for Azure CLI on Windows):
+
+```powershell
 # Login
 az login
 
 # Create app registration
-az ad app create \
-  --display-name "SpeechCalendarAssistant" \
-  --web-redirect-uris "http://localhost:8080" \
+az ad app create `
+  --display-name "SpeechCalendarAssistant" `
+  --web-redirect-uris "http://localhost:8080" `
   --required-resource-accesses @manifest.json
 
 # Create service principal
@@ -76,6 +80,8 @@ az ad app credential reset --id <app-id> --append
 az ad app permission admin-consent --id <app-id>
 ```
 
+**Note:** Use backtick `` ` `` for line continuation in PowerShell.
+
 ## 2. Azure Speech Service
 
 ### Portal Setup
@@ -85,13 +91,14 @@ az ad app permission admin-consent --id <app-id>
 3. Click **Create**
 
 **Configuration:**
+
 - **Subscription**: Your subscription
-- **Resource group**: 
+- **Resource group**:
   - Create new: `speech-calendar-rg`
   - Or use existing
 - **Region**: Choose closest (e.g., `eastus`, `westus2`)
 - **Name**: `speech-calendar-assistant` (must be globally unique)
-- **Pricing tier**: 
+- **Pricing tier**:
   - `F0` - Free (5 hours/month, limited features)
   - `S0` - Standard (pay-as-you-go)
 
@@ -107,52 +114,55 @@ az ad app permission admin-consent --id <app-id>
 
 ### Azure CLI Alternative
 
-```bash
-az cognitiveservices account create \
-  --name speech-calendar-assistant \
-  --resource-group speech-calendar-rg \
-  --kind SpeechServices \
-  --sku F0 \
+In PowerShell:
+
+```powershell
+az cognitiveservices account create `
+  --name speech-calendar-assistant `
+  --resource-group speech-calendar-rg `
+  --kind SpeechServices `
+  --sku F0 `
   --location eastus
 
 # Get keys
-az cognitiveservices account keys list \
-  --name speech-calendar-assistant \
+az cognitiveservices account keys list `
+  --name speech-calendar-assistant `
   --resource-group speech-calendar-rg
 ```
 
-## 3. Azure LUIS
+## 3. Azure CLU (Conversational Language Understanding)
 
-### Portal Setup
+### Create Language Resource
 
-1. Go to [LUIS Portal](https://www.luis.ai)
-2. Sign in with your Azure account
-3. Click **Create new app**
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Search for "Language service" or "Cognitive Services"
+3. Click **Create**
 4. Configure:
-   - **Name**: `SpeechCalendarAssistant`
-   - **Culture**: `English (en-us)`
-5. Follow the detailed configuration in `LUIS_CONFIGURATION.md`
-
-### Create Azure Resource
-
-1. In LUIS Portal, go to **Manage** > **Azure Resources**
-2. Click **Add resource** > **Create new resource**
-3. Configure:
-   - **Resource name**: `SpeechCalendarAssistant-LUIS`
    - **Subscription**: Your subscription
    - **Resource group**: `speech-calendar-rg`
+   - **Region**: Same as Speech Service (e.g., `eastus`)
+   - **Name**: `SpeechCalendarAssistant-CLU` (must be globally unique)
    - **Pricing tier**: `F0` (Free) or `S0` (Standard)
-   - **Location**: Same as Speech Service
-4. Click **Done**
+5. Click **Review + create** > **Create**
 
 ### Get Credentials
 
-1. Go to **Manage** > **Keys and Endpoint**
-2. Note:
-   - **App ID**: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
-   - **Primary Key**: `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-   - **Region**: `eastus`
-   - **Endpoint**: `https://eastus.api.cognitive.microsoft.com`
+1. Go to your Language resource in Azure Portal
+2. Navigate to **Keys and Endpoint**
+3. Note:
+   - **Key 1**: `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - **Endpoint**: `https://<resource-name>.cognitiveservices.azure.com`
+
+### Create CLU Project in Language Studio
+
+1. Go to [Language Studio](https://language.cognitive.azure.com/)
+2. Sign in with your Azure account
+3. Select your Language resource
+4. Click **Conversational language understanding**
+5. Follow the detailed configuration in `CLU_CONFIGURATION.md`
+6. Note:
+   - **Project Name**: `SpeechCalendarAssistant`
+   - **Deployment Name**: `production` (or your preferred name)
 
 ## 4. Azure Key Vault
 
@@ -163,6 +173,7 @@ az cognitiveservices account keys list \
 3. Click **Create**
 
 **Configuration:**
+
 - **Subscription**: Your subscription
 - **Resource group**: `speech-calendar-rg`
 - **Key vault name**: `speech-calendar-kv` (must be globally unique)
@@ -188,49 +199,54 @@ az cognitiveservices account keys list \
 2. Click **Generate/Import** for each:
 
 **azure-speech-key**
+
 - Name: `azure-speech-key`
 - Value: Your Speech Service Key 1
 - Click **Create**
 
-**azure-luis-key**
-- Name: `azure-luis-key`
-- Value: Your LUIS Primary Key
+**azure-clu-key**
+
+- Name: `azure-clu-key`
+- Value: Your CLU Key 1
 - Click **Create**
 
 **azure-client-secret**
+
 - Name: `azure-client-secret`
 - Value: Your Azure AD client secret
 - Click **Create**
 
 ### Azure CLI Alternative
 
-```bash
+In PowerShell:
+
+```powershell
 # Create Key Vault
-az keyvault create \
-  --name speech-calendar-kv \
-  --resource-group speech-calendar-rg \
+az keyvault create `
+  --name speech-calendar-kv `
+  --resource-group speech-calendar-rg `
   --location eastus
 
 # Set access policy
-az keyvault set-policy \
-  --name speech-calendar-kv \
-  --spn <app-client-id> \
+az keyvault set-policy `
+  --name speech-calendar-kv `
+  --spn <app-client-id> `
   --secret-permissions get list set
 
 # Add secrets
-az keyvault secret set \
-  --vault-name speech-calendar-kv \
-  --name azure-speech-key \
+az keyvault secret set `
+  --vault-name speech-calendar-kv `
+  --name azure-speech-key `
   --value "<speech-key>"
 
-az keyvault secret set \
-  --vault-name speech-calendar-kv \
-  --name azure-luis-key \
-  --value "<luis-key>"
+az keyvault secret set `
+  --vault-name speech-calendar-kv `
+  --name azure-clu-key `
+  --value "<clu-key>"
 
-az keyvault secret set \
-  --vault-name speech-calendar-kv \
-  --name azure-client-secret \
+az keyvault secret set `
+  --vault-name speech-calendar-kv `
+  --name azure-client-secret `
   --value "<client-secret>"
 ```
 
@@ -243,6 +259,7 @@ az keyvault secret set \
 3. Click **Create**
 
 **Configuration:**
+
 - **Subscription**: Your subscription
 - **Resource group**: `speech-calendar-rg`
 - **Name**: `speech-calendar-insights`
@@ -263,17 +280,19 @@ az keyvault secret set \
 
 ### Azure CLI Alternative
 
-```bash
-az monitor app-insights component create \
-  --app speech-calendar-insights \
-  --location eastus \
-  --resource-group speech-calendar-rg \
+In PowerShell:
+
+```powershell
+az monitor app-insights component create `
+  --app speech-calendar-insights `
+  --location eastus `
+  --resource-group speech-calendar-rg `
   --application-type java
 
 # Get instrumentation key
-az monitor app-insights component show \
-  --app speech-calendar-insights \
-  --resource-group speech-calendar-rg \
+az monitor app-insights component show `
+  --app speech-calendar-insights `
+  --resource-group speech-calendar-rg `
   --query instrumentationKey
 ```
 
@@ -286,6 +305,7 @@ az monitor app-insights component show \
 3. Click **Create**
 
 **Configuration:**
+
 - **Subscription**: Your subscription
 - **Resource group**: `speech-calendar-rg`
 - **Name**: `speech-calendar-app` (must be globally unique)
@@ -311,9 +331,11 @@ AZURE_CLIENT_SECRET = <your-client-secret>
 AZURE_KEY_VAULT_URI = https://speech-calendar-kv.vault.azure.net/
 AZURE_SPEECH_KEY = <your-speech-key>
 AZURE_SPEECH_REGION = eastus
-AZURE_LUIS_APP_ID = <your-luis-app-id>
-AZURE_LUIS_KEY = <your-luis-key>
-AZURE_LUIS_REGION = eastus
+AZURE_CLU_RESOURCE_NAME = <your-resource-name>
+AZURE_CLU_KEY = <your-clu-key>
+AZURE_CLU_PROJECT_NAME = SpeechCalendarAssistant
+AZURE_CLU_DEPLOYMENT_NAME = production
+AZURE_CLU_API_VERSION = 2022-05-01
 APPLICATIONINSIGHTS_INSTRUMENTATION_KEY = <your-instrumentation-key>
 APPLICATIONINSIGHTS_CONNECTION_STRING = <your-connection-string>
 ```
@@ -331,63 +353,50 @@ APPLICATIONINSIGHTS_CONNECTION_STRING = <your-connection-string>
 
 ### Azure CLI Alternative
 
-```bash
+In PowerShell:
+
+```powershell
 # Create App Service Plan
-az appservice plan create \
-  --name speech-calendar-plan \
-  --resource-group speech-calendar-rg \
-  --sku F1 \
+az appservice plan create `
+  --name speech-calendar-plan `
+  --resource-group speech-calendar-rg `
+  --sku F1 `
   --is-linux
 
 # Create Web App
-az webapp create \
-  --name speech-calendar-app \
-  --resource-group speech-calendar-rg \
-  --plan speech-calendar-plan \
+az webapp create `
+  --name speech-calendar-app `
+  --resource-group speech-calendar-rg `
+  --plan speech-calendar-plan `
   --runtime "JAVA:17-java17"
 
 # Configure app settings
-az webapp config appsettings set \
-  --name speech-calendar-app \
-  --resource-group speech-calendar-rg \
-  --settings \
-    AZURE_TENANT_ID="<tenant-id>" \
-    AZURE_CLIENT_ID="<client-id>" \
-    AZURE_CLIENT_SECRET="<client-secret>" \
-    AZURE_KEY_VAULT_URI="https://speech-calendar-kv.vault.azure.net/" \
-    AZURE_SPEECH_KEY="<speech-key>" \
-    AZURE_SPEECH_REGION="eastus" \
-    AZURE_LUIS_APP_ID="<luis-app-id>" \
-    AZURE_LUIS_KEY="<luis-key>" \
-    AZURE_LUIS_REGION="eastus"
+az webapp config appsettings set `
+  --name speech-calendar-app `
+  --resource-group speech-calendar-rg `
+  --settings `
+    AZURE_TENANT_ID="<tenant-id>" `
+    AZURE_CLIENT_ID="<client-id>" `
+    AZURE_CLIENT_SECRET="<client-secret>" `
+    AZURE_KEY_VAULT_URI="https://speech-calendar-kv.vault.azure.net/" `
+    AZURE_SPEECH_KEY="<speech-key>" `
+    AZURE_SPEECH_REGION="eastus" `
+    AZURE_CLU_RESOURCE_NAME="<resource-name>" `
+    AZURE_CLU_KEY="<clu-key>" `
+    AZURE_CLU_PROJECT_NAME="SpeechCalendarAssistant" `
+    AZURE_CLU_DEPLOYMENT_NAME="production" `
+    AZURE_CLU_API_VERSION="2022-05-01"
 ```
 
-## 7. Environment Variables Summary
+## 7. Configuration Summary
 
-Create a `.env` file or set these in your deployment:
+Configure these values in `application.yml` (see `QUICK_START.md` for details):
 
-```bash
-# Azure AD
-AZURE_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-AZURE_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-AZURE_CLIENT_SECRET=your-client-secret-value
-
-# Azure Key Vault
-AZURE_KEY_VAULT_URI=https://speech-calendar-kv.vault.azure.net/
-
-# Azure Speech Service
-AZURE_SPEECH_KEY=your-speech-key
-AZURE_SPEECH_REGION=eastus
-
-# Azure LUIS
-AZURE_LUIS_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-AZURE_LUIS_KEY=your-luis-key
-AZURE_LUIS_REGION=eastus
-
-# Application Insights (Optional)
-APPLICATIONINSIGHTS_INSTRUMENTATION_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=xxx;IngestionEndpoint=xxx
-```
+- **Azure AD**: `tenant-id`, `client-id`, `client-secret`
+- **Azure Key Vault**: `uri`
+- **Azure Speech Service**: `key`, `region`
+- **Azure CLU**: `endpoint`, `key`, `project-name`, `deployment-name`, `api-version`
+- **Application Insights** (optional): `instrumentation-key`, `connection-string`
 
 ## 8. Verification Checklist
 
@@ -395,29 +404,31 @@ APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=xxx;IngestionEndpoint=x
 - [ ] Client secret created and saved
 - [ ] Admin consent granted for Graph API permissions
 - [ ] Speech Service created and key obtained
-- [ ] LUIS app created, trained, and published
-- [ ] LUIS Azure resource linked and key obtained
+- [ ] CLU project created, trained, and deployed
+- [ ] CLU Azure resource created and key obtained
 - [ ] Key Vault created with access policy configured
 - [ ] Secrets added to Key Vault
 - [ ] Application Insights created (optional)
 - [ ] App Service created and configured (if deploying)
-- [ ] All environment variables set correctly
+- [ ] All configuration values in `application.yml` are set correctly
 - [ ] Application starts without errors
 - [ ] Health endpoint returns success
 - [ ] Speech recognition works in browser
-- [ ] LUIS extracts intents and entities correctly
+- [ ] CLU extracts intents and entities correctly
 - [ ] Calendar events can be created via Graph API
 
 ## 9. Cost Estimation
 
 **Free Tier (F0) Resources:**
+
 - Speech Service: 5 hours/month free
-- LUIS: 10,000 transactions/month free
+- Language Service (CLU): 5,000 text records/month free
 - App Service: Limited free tier available
 
 **Estimated Monthly Cost (Standard Tier):**
+
 - Speech Service (S0): ~$1 per hour of audio
-- LUIS (S0): ~$0.50 per 1,000 transactions
+- Language Service (S0): ~$0.30 per 1,000 text records (includes CLU)
 - App Service (B1): ~$13/month
 - Key Vault: ~$0.03 per 10,000 operations
 - Application Insights: First 5GB free, then ~$2.30/GB
@@ -447,12 +458,12 @@ APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=xxx;IngestionEndpoint=x
 - Ensure HTTPS is used in production
 - Review browser console for errors
 
-### LUIS Not Working
+### CLU Not Working
 
-- Verify app is published to Production slot
-- Check endpoint URL is correct
-- Ensure key and region match
-- Review LUIS portal for errors
+- Verify project is deployed to production deployment
+- Check endpoint URL format: `https://<resource-name>.cognitiveservices.azure.com`
+- Ensure API key and project/deployment names match
+- Review Language Studio for deployment status and errors
 
 ### Graph API Errors
 
@@ -463,10 +474,9 @@ APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=xxx;IngestionEndpoint=x
 
 ## Next Steps
 
-1. Complete LUIS configuration (see `LUIS_CONFIGURATION.md`)
+1. Complete CLU configuration (see `CLU_CONFIGURATION.md`)
 2. Deploy the application locally
 3. Test all functionality
 4. Deploy to Azure App Service
 5. Monitor using Application Insights
 6. Set up alerts for errors
-

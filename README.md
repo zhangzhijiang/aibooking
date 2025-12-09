@@ -1,11 +1,11 @@
-# Speech-Driven Outlook Calendar Booking Assistant
+# Speech-Driven Outlook Calendar Schedule Assistant
 
-A complete Java Spring Boot application that enables users to book meetings in Microsoft Outlook Calendar using speech input. The system integrates Azure Speech Services, LUIS (Language Understanding), and Microsoft Graph API.
+A complete Java Spring Boot application that enables users to schedule meetings in Microsoft Outlook Calendar using speech input. The system integrates Azure Speech Services, CLU (Conversational Language Understanding), and Microsoft Graph API.
 
 ## Features
 
 - 🎤 **Speech Input**: Web-based UI with microphone button using Azure Speech SDK
-- 🧠 **NLP Processing**: Azure LUIS for intent and entity extraction
+- 🧠 **NLP Processing**: Azure CLU for intent and entity extraction
 - 📅 **Calendar Integration**: Microsoft Graph API for creating, updating, and deleting calendar events
 - 🔄 **Recurring Events**: Support for complex recurrence patterns with exception handling
 - 🔐 **Security**: Azure AD OAuth 2.0 authentication with Key Vault for secrets
@@ -26,7 +26,7 @@ A complete Java Spring Boot application that enables users to book meetings in M
 │  REST API       │
 └──────┬──────────┘
        │
-       ├──► Azure LUIS (NLP)
+       ├──► Azure CLU (NLP)
        ├──► Microsoft Graph API (Calendar)
        ├──► Azure Key Vault (Secrets)
        └──► Application Insights (Monitoring)
@@ -73,27 +73,26 @@ A complete Java Spring Boot application that enables users to book meetings in M
 4. Go to the resource > **Keys and Endpoint**
 5. Note the **Key 1** and **Region**
 
-### 3. Azure LUIS
+### 3. Azure CLU (Conversational Language Understanding)
 
-1. Go to [LUIS Portal](https://www.luis.ai)
-2. Sign in with your Azure account
-3. Create a new app: **SpeechCalendarAssistant**
-4. Configure intents:
+1. Go to [Language Studio](https://language.cognitive.azure.com/)
+2. Create a new **Language** resource in Azure Portal if you haven't already
+3. Sign in to Language Studio with your Azure account
+4. Create a new CLU project: **SpeechCalendarAssistant**
+5. Configure intents:
    - `BookMeeting`
    - `CancelMeeting`
    - `RescheduleMeeting`
-5. Configure entities:
-   - `personName` (Simple entity)
-   - `datetime` (Prebuilt: `datetimeV2`)
-   - `recurrence` (Simple entity)
-   - `exception` (Simple entity)
-   - `subject` (Simple entity)
-   - `location` (Simple entity)
-6. Train the model with example utterances (see `LUIS_CONFIGURATION.md`)
-7. Publish the app to **Production** slot
-8. Go to **Manage** > **Azure Resources**
-9. Create a new resource or link existing
-10. Note the **App ID**, **Key**, and **Region**
+6. Configure entities:
+   - `PersonName` (Learned entity)
+   - `DateTime` (Prebuilt entity)
+   - `Recurrence` (Learned entity)
+   - `Exception` (Learned entity)
+   - `Subject` (Learned entity)
+   - `Location` (Learned entity)
+7. Train the model with example utterances (see `CLU_CONFIGURATION.md`)
+8. Deploy the model to **production** (or your preferred deployment name)
+9. Note the **Endpoint**, **Key**, **Project Name**, and **Deployment Name**
 
 ### 4. Azure Key Vault
 
@@ -109,7 +108,7 @@ A complete Java Spring Boot application that enables users to book meetings in M
 6. Grant **Secret permissions**: Get, List, Set
 7. Add secrets:
    - `azure-speech-key`
-   - `azure-luis-key`
+   - `azure-clu-key`
    - `azure-client-secret`
 
 ### 5. Application Insights
@@ -130,48 +129,69 @@ A complete Java Spring Boot application that enables users to book meetings in M
    - **Runtime stack**: Java 17
    - **Operating System**: Linux
 3. Click **Create**
-4. Configure **Configuration** > **Application settings** with all environment variables
+4. Configure **Configuration** > **Application settings** (if needed for Azure App Service)
 
 ## Local Setup
 
 ### 1. Clone and Build
 
-```bash
+Open Command Prompt or PowerShell and run:
+
+```cmd
 git clone <repository-url>
-cd aibooking
+cd schedulehub
 mvn clean install
 ```
 
-### 2. Configure Environment Variables
+### 2. Configure application.yml
 
-Create a `.env` file or set environment variables:
+Edit `src/main/resources/application.yml` and replace the placeholder values with your actual Azure credentials:
 
-```bash
-# Azure AD
-export AZURE_TENANT_ID="your-tenant-id"
-export AZURE_CLIENT_ID="your-client-id"
-export AZURE_CLIENT_SECRET="your-client-secret"
+```yaml
+server:
+  port: 8080
 
-# Azure Key Vault
-export AZURE_KEY_VAULT_URI="https://speech-calendar-kv.vault.azure.net/"
+spring:
+  application:
+    name: speech-calendar-assistant
 
-# Azure Speech Service
-export AZURE_SPEECH_KEY="your-speech-key"
-export AZURE_SPEECH_REGION="eastus"
+azure:
+  activedirectory:
+    tenant-id: your-tenant-id
+    client-id: your-client-id
+    client-secret: your-client-secret
+    authority: https://login.microsoftonline.com/your-tenant-id
+  keyvault:
+    uri: https://your-keyvault.vault.azure.net/
+    enabled: true
+  speech:
+    key: your-speech-key
+    region: eastus
+  clu:
+    endpoint: https://your-resource-name.cognitiveservices.azure.com
+    key: your-clu-key
+    project-name: SpeechCalendarAssistant
+    deployment-name: production
+    api-version: 2022-05-01
+  application-insights:
+    instrumentation-key: # Optional: your-instrumentation-key
+    connection-string: # Optional: your-connection-string
 
-# Azure LUIS
-export AZURE_LUIS_APP_ID="your-luis-app-id"
-export AZURE_LUIS_KEY="your-luis-key"
-export AZURE_LUIS_REGION="eastus"
+microsoft:
+  graph:
+    scope: https://graph.microsoft.com/.default
+    endpoint: https://graph.microsoft.com/v1.0
 
-# Application Insights (optional)
-export APPLICATIONINSIGHTS_INSTRUMENTATION_KEY="your-instrumentation-key"
-export APPLICATIONINSIGHTS_CONNECTION_STRING="your-connection-string"
+logging:
+  level:
+    com.bestbuy.schedulehub: INFO
+    com.microsoft.graph: DEBUG
+    com.azure: DEBUG
 ```
 
 ### 3. Run the Application
 
-```bash
+```cmd
 mvn spring-boot:run
 ```
 
@@ -183,13 +203,13 @@ Open your browser and navigate to `http://localhost:8080`
 
 1. Enter your Azure Speech Service key and region
 2. Click the microphone button
-3. Speak your booking request (e.g., "Book Mary for 2 PM tomorrow")
+3. Speak your schedule request (e.g., "Book Mary for 2 PM tomorrow")
 
 ## API Endpoints
 
-### POST /api/bookMeeting
+### POST /api/scheduleMeeting
 
-Book, cancel, or reschedule a meeting based on natural language input.
+Schedule, cancel, or reschedule a meeting based on natural language input.
 
 **Request:**
 
@@ -204,7 +224,7 @@ Book, cancel, or reschedule a meeting based on natural language input.
 ```json
 {
   "status": "success",
-  "message": "Meeting booked successfully",
+  "message": "Meeting scheduled successfully",
   "eventId": "AAMkAGI2...",
   "eventSubject": "Meeting with Mary",
   "startTime": "2024-01-16T14:00:00",
@@ -223,7 +243,7 @@ Health check endpoint.
 
 ### Run All Tests
 
-```bash
+```cmd
 mvn test
 ```
 
@@ -231,8 +251,8 @@ mvn test
 
 The project includes comprehensive tests for:
 
-1. **Simple booking**: "Book Mary for 2 PM tomorrow"
-2. **Recurring booking with exception**: "Book myTeam 3 PM to 4 PM every weekday, except every second Tuesday"
+1. **Simple Schedule**: "Book Mary for 2 PM tomorrow" (natural language example)
+2. **Recurring Schedule with exception**: "Book myTeam 3 PM to 4 PM every weekday, except every second Tuesday" (natural language example)
 3. **Multiple exclusions**: "Schedule team sync 9 AM every weekday, but skip Monday in the first week and skip Tuesday/Thursday in the second week"
 4. **Cancel meeting**: "Cancel my meeting with Alex on Jan 15 at 10 AM"
 5. **Reschedule meeting**: "Reschedule my meeting with Sarah from 2 PM to 3 PM next Friday"
@@ -241,45 +261,51 @@ The project includes comprehensive tests for:
 
 ### 1. Build the Application
 
-```bash
+```cmd
 mvn clean package -DskipTests
 ```
 
 ### 2. Deploy via Azure CLI
 
-```bash
-az webapp deploy \
-  --resource-group <resource-group> \
-  --name speech-calendar-app \
-  --type jar \
+In PowerShell (Azure CLI commands work the same on Windows):
+
+```powershell
+az webapp deploy `
+  --resource-group <resource-group> `
+  --name speech-calendar-app `
+  --type jar `
   --src-path target/speech-calendar-assistant-1.0.0.jar
 ```
 
+**Note:** Use backtick `` ` `` for line continuation in PowerShell. In Command Prompt, you can use `^` but PowerShell is recommended for Azure CLI.
+
 ### 3. Configure App Settings
 
-```bash
-az webapp config appsettings set \
-  --resource-group <resource-group> \
-  --name speech-calendar-app \
-  --settings \
-    AZURE_TENANT_ID="<tenant-id>" \
-    AZURE_CLIENT_ID="<client-id>" \
-    AZURE_CLIENT_SECRET="<client-secret>" \
-    AZURE_KEY_VAULT_URI="<key-vault-uri>" \
-    AZURE_SPEECH_KEY="<speech-key>" \
-    AZURE_SPEECH_REGION="eastus" \
-    AZURE_LUIS_APP_ID="<luis-app-id>" \
-    AZURE_LUIS_KEY="<luis-key>" \
-    AZURE_LUIS_REGION="eastus"
+```powershell
+az webapp config appsettings set `
+  --resource-group <resource-group> `
+  --name speech-calendar-app `
+  --settings `
+    AZURE_TENANT_ID="<tenant-id>" `
+    AZURE_CLIENT_ID="<client-id>" `
+    AZURE_CLIENT_SECRET="<client-secret>" `
+    AZURE_KEY_VAULT_URI="<key-vault-uri>" `
+    AZURE_SPEECH_KEY="<speech-key>" `
+    AZURE_SPEECH_REGION="eastus" `
+    AZURE_CLU_RESOURCE_NAME="<resource-name>" `
+    AZURE_CLU_KEY="<clu-key>" `
+    AZURE_CLU_PROJECT_NAME="SpeechCalendarAssistant" `
+    AZURE_CLU_DEPLOYMENT_NAME="production" `
+    AZURE_CLU_API_VERSION="2022-05-01"
 ```
 
 ## Project Structure
 
 ```
-aibooking/
+schedulehub/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/aibooking/
+│   │   ├── java/com/bestbuy/schedulehub/
 │   │   │   ├── config/          # Configuration classes
 │   │   │   ├── controller/      # REST controllers
 │   │   │   ├── dto/             # Data transfer objects
@@ -287,7 +313,7 @@ aibooking/
 │   │   │   └── SpeechCalendarAssistantApplication.java
 │   │   └── resources/
 │   │       ├── static/          # Frontend HTML/JS
-│   │       └── application.properties
+│   │       └── application.yml
 │   └── test/                    # Unit and integration tests
 ├── pom.xml
 └── README.md
@@ -301,11 +327,12 @@ aibooking/
 - Check browser microphone permissions
 - Ensure HTTPS is used in production (required for microphone access)
 
-### LUIS Not Extracting Entities
+### CLU Not Extracting Entities
 
-- Verify LUIS app is published to Production slot
+- Verify CLU project is deployed to production deployment
 - Check that example utterances are properly labeled
-- Review LUIS response in application logs
+- Review CLU response in application logs
+- Ensure project name and deployment name match configuration
 
 ### Graph API Authentication Errors
 
@@ -328,4 +355,4 @@ For issues and questions, please refer to:
 
 - [Azure Speech Service Documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/)
 - [Microsoft Graph API Documentation](https://docs.microsoft.com/graph/)
-- [Azure LUIS Documentation](https://docs.microsoft.com/azure/cognitive-services/luis/)
+- [Azure CLU Documentation](https://learn.microsoft.com/azure/ai-services/language-service/conversational-language-understanding/overview)

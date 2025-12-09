@@ -1,6 +1,6 @@
-package com.aibooking.service;
+package com.bestbuy.schedulehub.service;
 
-import com.aibooking.dto.ExtractedEntities;
+import com.bestbuy.schedulehub.dto.ExtractedEntities;
 import com.microsoft.graph.core.DateOnly;
 import com.microsoft.graph.models.*;
 import com.microsoft.graph.requests.EventCollectionPage;

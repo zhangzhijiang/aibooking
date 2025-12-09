@@ -1,0 +1,39 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: speech-calendar-assistant-test
+
+azure:
+  activedirectory:
+    tenant-id: test-tenant-id
+    client-id: test-client-id
+    client-secret: test-client-secret
+    authority: https://login.microsoftonline.com/test-tenant-id
+  keyvault:
+    uri: https://test-keyvault.vault.azure.net/
+    enabled: false
+  speech:
+    key: test-speech-key
+    region: test-region
+  clu:
+    endpoint: https://test-resource.cognitiveservices.azure.com
+    key: test-clu-key
+    project-name: test-project
+    deployment-name: test-deployment
+    api-version: 2022-05-01
+  application-insights:
+    instrumentation-key: ""
+    connection-string: ""
+
+microsoft:
+  graph:
+    scope: https://graph.microsoft.com/.default
+    endpoint: https://graph.microsoft.com/v1.0
+
+logging:
+  level:
+    com.bestbuy.schedulehub: DEBUG
+    com.microsoft.graph: WARN
+    com.azure: WARN

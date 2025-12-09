@@ -1,4 +1,4 @@
-package com.aibooking.config;
+package com.bestbuy.schedulehub.config;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredential;
@@ -41,4 +41,3 @@ public class AzureConfig {
                 .buildClient();
     }
 }
-

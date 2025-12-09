@@ -1,4 +1,4 @@
-package com.aibooking.dto;
+package com.bestbuy.schedulehub.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +23,3 @@ public class ExtractedEntities {
     private String subject;
     private String location;
 }
-

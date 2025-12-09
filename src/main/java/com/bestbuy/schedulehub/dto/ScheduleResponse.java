@@ -1,4 +1,4 @@
-package com.aibooking.dto;
+package com.bestbuy.schedulehub.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingResponse {
+public class ScheduleResponse {
     private String status;
     private String message;
     private String eventId;
@@ -23,4 +23,3 @@ public class BookingResponse {
     private String recurrencePattern;
     private List<String> exceptions;
 }
-

@@ -1,4 +1,4 @@
-package com.aibooking.service;
+package com.bestbuy.schedulehub.service;
 
 import com.azure.security.keyvault.secrets.SecretClient;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class KeyVaultService {
 
     private final SecretClient secretClient;
-    
+
     @Value("${azure.keyvault.enabled:false}")
     private boolean keyVaultEnabled;
 
@@ -21,7 +21,7 @@ public class KeyVaultService {
             log.warn("Key Vault is disabled, returning null for secret: {}", secretName);
             return null;
         }
-        
+
         try {
             return secretClient.getSecret(secretName).getValue();
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class KeyVaultService {
             log.warn("Key Vault is disabled, cannot set secret: {}", secretName);
             return;
         }
-        
+
         try {
             secretClient.setSecret(secretName, secretValue);
             log.info("Secret {} set successfully", secretName);
@@ -44,4 +44,3 @@ public class KeyVaultService {
         }
     }
 }
-
