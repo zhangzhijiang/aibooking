@@ -28,7 +28,7 @@ azure:
 # Using Azure OpenAI (set endpoint and deployment-name)
 # For standard OpenAI, remove endpoint and use API key starting with 'sk-'
 openai:
-  api-key: # Required: Azure OpenAI API key (from Azure Portal)
+  # api-key: # Required: Azure OpenAI API key (from Azure Portal)
   model: # Deployment name in Azure OpenAI
   endpoint: # Azure OpenAI endpoint
   deployment-name: # Optional: Azure OpenAI deployment name (defaults to model if not specified)
