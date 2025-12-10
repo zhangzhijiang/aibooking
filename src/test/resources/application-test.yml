@@ -11,21 +11,14 @@ azure:
     client-id: test-client-id
     client-secret: test-client-secret
     authority: https://login.microsoftonline.com/test-tenant-id
-  keyvault:
-    uri: https://test-keyvault.vault.azure.net/
-    enabled: false
-  speech:
-    key: test-speech-key
-    region: test-region
-  clu:
-    endpoint: https://test-resource.cognitiveservices.azure.com
-    key: test-clu-key
-    project-name: test-project
-    deployment-name: test-deployment
-    api-version: 2022-05-01
   application-insights:
     instrumentation-key: ""
     connection-string: ""
+
+# OpenAI Configuration for tests
+openai:
+  api-key: test-openai-api-key
+  model: gpt-4o-mini
 
 microsoft:
   graph:

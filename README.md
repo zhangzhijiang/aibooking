@@ -1,15 +1,15 @@
-# Speech-Driven Outlook Calendar Schedule Assistant
+# Schedule Hub - Outlook Calendar Assistant
 
-A complete Java Spring Boot application that enables users to schedule meetings in Microsoft Outlook Calendar using speech input. Schedule Hub provides a unified interface for managing calendar events through natural language. The system integrates Azure Speech Services, CLU (Conversational Language Understanding), and Microsoft Graph API.
+A Java Spring Boot application that enables users to schedule meetings in Microsoft Outlook Calendar using natural language text input. Schedule Hub provides a simple web interface for managing calendar events through natural language processing powered by OpenAI.
 
 ## Features
 
-- 🎤 **Speech Input**: Web-based UI with microphone button using Azure Speech SDK
-- 🧠 **NLP Processing**: Azure CLU for intent and entity extraction
+- 📝 **Text Input**: Simple web-based UI for entering scheduling requests
+- 🤖 **AI-Powered NLP**: OpenAI GPT for intent and entity extraction
 - 📅 **Calendar Integration**: Microsoft Graph API for creating, updating, and deleting calendar events
 - 🔄 **Recurring Events**: Support for complex recurrence patterns with exception handling
-- 🔐 **Security**: Azure AD OAuth 2.0 authentication with Key Vault for secrets
-- 📊 **Monitoring**: Azure Application Insights integration
+- 🔐 **Security**: Azure AD OAuth 2.0 authentication
+- 📊 **Monitoring**: Azure Application Insights integration (optional)
 - ✅ **Automated Tests**: Comprehensive unit and integration tests
 
 ## Architecture
@@ -19,133 +19,33 @@ A complete Java Spring Boot application that enables users to schedule meetings 
 │   Browser   │
 │  (HTML/JS)  │
 └──────┬──────┘
-       │ Speech SDK
+       │ HTTP POST
        ▼
 ┌─────────────────┐
 │  Spring Boot    │
 │  REST API       │
 └──────┬──────────┘
        │
-       ├──► Azure CLU (NLP)
+       ├──► OpenAI API (NLP/Intent Extraction)
        ├──► Microsoft Graph API (Calendar)
-       ├──► Azure Key Vault (Secrets)
-       └──► Application Insights (Monitoring)
+       └──► Application Insights (Monitoring - Optional)
 ```
+
+For detailed architecture and design documentation, see [DESIGN.md](DESIGN.md).
 
 ## Prerequisites
 
 - Java 17 or higher
 - Maven 3.6+
-- Azure subscription
+- Azure subscription (for Azure AD and Microsoft Graph)
+- OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
 - Microsoft 365 account with Outlook Calendar access
 
-## Azure Resources Setup
+## Quick Start
 
-### 1. Azure AD App Registration
+### 1. Configure application.yml
 
-1. Go to [Azure Portal](https://portal.azure.com)
-2. Navigate to **Azure Active Directory** > **App registrations**
-3. Click **New registration**
-4. Configure:
-   - **Name**: `ScheduleHub`
-   - **Supported account types**: Accounts in this organizational directory only
-   - **Redirect URI**: `http://localhost:8080` (for local testing)
-5. Click **Register**
-6. Note the **Application (client) ID** and **Directory (tenant) ID**
-7. Go to **Certificates & secrets** > **New client secret**
-8. Create a secret and note the **Value** (you'll need it later)
-9. Go to **API permissions** > **Add a permission** > **Microsoft Graph**
-10. Add the following **Application permissions**:
-    - `Calendars.ReadWrite`
-    - `User.Read.All`
-11. Click **Grant admin consent**
-
-### 2. Azure Speech Service
-
-1. Go to **Create a resource** > **Speech**
-2. Configure:
-   - **Subscription**: Your subscription
-   - **Resource group**: Create new or use existing
-   - **Region**: Choose closest region (e.g., `eastus`)
-   - **Name**: `schedule-hub`
-   - **Pricing tier**: F0 (Free) or S0 (Standard)
-3. Click **Create**
-4. Go to the resource > **Keys and Endpoint**
-5. Note the **Key 1** and **Region**
-
-### 3. Azure CLU (Conversational Language Understanding)
-
-1. Go to [Language Studio](https://language.cognitive.azure.com/)
-2. Create a new **Language** resource in Azure Portal if you haven't already
-3. Sign in to Language Studio with your Azure account
-4. Create a new CLU project: **ScheduleHub**
-5. Configure intents:
-   - `BookMeeting`
-   - `CancelMeeting`
-   - `RescheduleMeeting`
-6. Configure entities:
-   - `PersonName` (Learned entity)
-   - `DateTime` (Prebuilt entity)
-   - `Recurrence` (Learned entity)
-   - `Exception` (Learned entity)
-   - `Subject` (Learned entity)
-   - `Location` (Learned entity)
-7. Train the model with example utterances (see `CLU_CONFIGURATION.md`)
-8. Deploy the model to **production** (or your preferred deployment name)
-9. Note the **Endpoint**, **Key**, **Project Name**, and **Deployment Name**
-
-### 4. Azure Key Vault
-
-1. Go to **Create a resource** > **Key Vault**
-2. Configure:
-   - **Name**: `speech-calendar-kv`
-   - **Resource group**: Same as above
-   - **Region**: Same as above
-   - **Pricing tier**: Standard
-3. Click **Create**
-4. Go to **Access policies** > **Add Access Policy**
-5. Select your app registration's service principal
-6. Grant **Secret permissions**: Get, List, Set
-7. Add secrets:
-   - `azure-speech-key`
-   - `azure-clu-key`
-   - `azure-client-secret`
-
-### 5. Application Insights
-
-1. Go to **Create a resource** > **Application Insights**
-2. Configure:
-   - **Name**: `speech-calendar-insights`
-   - **Resource group**: Same as above
-   - **Application type**: Java
-3. Click **Create**
-4. Note the **Instrumentation Key** and **Connection String**
-
-### 6. Azure App Service (Optional - for deployment)
-
-1. Go to **Create a resource** > **Web App**
-2. Configure:
-   - **Name**: `speech-calendar-app`
-   - **Runtime stack**: Java 17
-   - **Operating System**: Linux
-3. Click **Create**
-4. Configure **Configuration** > **Application settings** (if needed for Azure App Service)
-
-## Local Setup
-
-### 1. Clone and Build
-
-Open Command Prompt or PowerShell and run:
-
-```cmd
-git clone <repository-url>
-cd schedulehub
-mvn clean install
-```
-
-### 2. Configure application.yml
-
-Edit `src/main/resources/application.yml` and replace the placeholder values with your actual Azure credentials:
+Edit `src/main/resources/application.yml`:
 
 ```yaml
 server:
@@ -161,21 +61,14 @@ azure:
     client-id: your-client-id
     client-secret: your-client-secret
     authority: https://login.microsoftonline.com/your-tenant-id
-  keyvault:
-    uri: https://your-keyvault.vault.azure.net/
-    enabled: true
-  speech:
-    key: your-speech-key
-    region: eastus
-  clu:
-    endpoint: https://your-resource-name.cognitiveservices.azure.com
-    key: your-clu-key
-    project-name: ScheduleHub
-    deployment-name: production
-    api-version: 2022-05-01
   application-insights:
-    instrumentation-key: # Optional: your-instrumentation-key
-    connection-string: # Optional: your-connection-string
+    instrumentation-key: # Optional
+    connection-string: # Optional
+
+# OpenAI Configuration
+openai:
+  api-key: your-openai-api-key-here # Get from https://platform.openai.com/api-keys
+  model: gpt-4o-mini # Options: gpt-4o-mini (cheapest), gpt-4o, gpt-3.5-turbo
 
 microsoft:
   graph:
@@ -185,25 +78,57 @@ microsoft:
 logging:
   level:
     com.bestbuy.schedulehub: INFO
-    com.microsoft.graph: DEBUG
-    com.azure: DEBUG
 ```
 
-### 3. Run the Application
+### 2. Azure AD App Registration (Application Permissions)
+
+This application uses **Application Permissions** (service-driven architecture). It acts as a service principal and can manage calendars for all users in your tenant.
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to **Azure Active Directory** > **App registrations**
+3. Click **New registration**
+4. Configure:
+   - **Name**: `ScheduleHub`
+   - **Supported account types**: Accounts in this organizational directory only
+5. Click **Register**
+6. Note the **Application (client) ID** and **Directory (tenant) ID**
+7. Go to **Certificates & secrets** > **New client secret**
+8. Create a secret and note the **Value** (copy immediately - it won't be shown again)
+9. Go to **API permissions** > **Add a permission** > **Microsoft Graph**
+10. Choose **Application permissions** (NOT Delegated)
+11. Add the following permissions:
+    - `Calendars.ReadWrite` - Read and write calendars for all users
+    - `User.Read.All` - Read all users' profiles
+12. Click **Add permissions**
+13. **IMPORTANT**: Click **Grant admin consent for [your organization]**
+14. Verify both permissions show "Granted for [your org]" with admin consent
+
+**Note:** When making API requests, include the `X-User-Id` header with the user's email or object ID to specify which user's calendar to manage.
+
+### 3. Get OpenAI API Key
+
+1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
+2. Sign in or create an account
+3. Click **Create new secret key**
+4. Copy the API key (starts with `sk-`)
+5. Add it to `application.yml` under `openai.api-key`
+
+### 4. Build and Run
 
 ```cmd
+mvn clean install
 mvn spring-boot:run
 ```
 
 The application will start on `http://localhost:8080`
 
-### 4. Access the Web UI
+### 5. Access the Web UI
 
 Open your browser and navigate to `http://localhost:8080`
 
-1. Enter your Azure Speech Service key and region
-2. Click the microphone button
-3. Speak your schedule request (e.g., "Book Mary for 2 PM tomorrow")
+1. Type your scheduling request (e.g., "Book Mary for 2 PM tomorrow")
+2. Click Submit or press Enter
+3. View the booking confirmation
 
 ## API Endpoints
 
@@ -227,8 +152,8 @@ Schedule, cancel, or reschedule a meeting based on natural language input.
   "message": "Meeting scheduled successfully",
   "eventId": "AAMkAGI2...",
   "eventSubject": "Meeting with Mary",
-  "startTime": "2024-01-16T14:00:00",
-  "endTime": "2024-01-16T15:00:00",
+  "startTime": "2025-12-10T14:00:00",
+  "endTime": "2025-12-10T15:00:00",
   "attendees": ["Mary"],
   "recurrencePattern": null,
   "exceptions": null
@@ -238,6 +163,84 @@ Schedule, cancel, or reschedule a meeting based on natural language input.
 ### GET /api/health
 
 Health check endpoint.
+
+## Example Requests
+
+### Book a Meeting
+
+```
+"Book Mary for 2 PM tomorrow"
+"Schedule a meeting with John at 3 PM next Friday"
+"Create an appointment with Sarah on January 20 at 10 AM"
+```
+
+### Cancel a Meeting
+
+```
+"Cancel my meeting with Alex on Jan 15 at 10 AM"
+"Delete the appointment with Sarah tomorrow"
+```
+
+### Reschedule a Meeting
+
+```
+"Reschedule my meeting with Sarah from 2 PM to 3 PM next Friday"
+"Move the appointment with John to tomorrow at 4 PM"
+```
+
+### Recurring Meetings
+
+```
+"Book myTeam 3 PM to 4 PM every weekday"
+"Schedule team sync 9 AM every weekday from January to July"
+```
+
+## Project Structure
+
+```
+schedulehub/
+├── src/
+│   ├── main/
+│   │   ├── java/com/bestbuy/schedulehub/
+│   │   │   ├── config/          # Configuration classes
+│   │   │   │   ├── AzureConfig.java       # Azure AD authentication
+│   │   │   │   └── GraphApiConfig.java    # Microsoft Graph API config
+│   │   │   ├── controller/      # REST controllers
+│   │   │   │   └── ScheduleController.java
+│   │   │   ├── dto/             # Data transfer objects
+│   │   │   │   ├── ScheduleRequest.java
+│   │   │   │   ├── ScheduleResponse.java
+│   │   │   │   └── ExtractedEntities.java
+│   │   │   ├── service/         # Business logic services
+│   │   │   │   ├── ScheduleService.java    # Main orchestration
+│   │   │   │   ├── OpenAIService.java      # OpenAI NLP integration
+│   │   │   │   └── GraphCalendarService.java # Graph API integration
+│   │   │   └── ScheduleHubApplication.java
+│   │   └── resources/
+│   │       ├── static/          # Frontend HTML/JS
+│   │       │   ├── index.html
+│   │       │   └── app.js
+│   │       └── application.yml
+│   └── test/                    # Unit and integration tests
+├── pom.xml
+└── README.md
+```
+
+## Configuration
+
+All configuration is done through `application.yml`. No external services like Key Vault are required.
+
+### Required Configuration
+
+- `azure.activedirectory.*` - Azure AD credentials for Microsoft Graph authentication
+- `openai.api-key` - Your OpenAI API key
+- `microsoft.graph.*` - Microsoft Graph API settings
+
+### Optional Configuration
+
+- `openai.model` - OpenAI model to use (default: `gpt-4o-mini`)
+- `azure.application-insights.*` - Application Insights for monitoring
+- `logging.level.*` - Logging configuration
 
 ## Testing
 
@@ -251,108 +254,88 @@ mvn test
 
 The project includes comprehensive tests for:
 
-1. **Simple Schedule**: "Book Mary for 2 PM tomorrow" (natural language example)
-2. **Recurring Schedule with exception**: "Book myTeam 3 PM to 4 PM every weekday, except every second Tuesday" (natural language example)
-3. **Multiple exclusions**: "Schedule team sync 9 AM every weekday, but skip Monday in the first week and skip Tuesday/Thursday in the second week"
-4. **Cancel meeting**: "Cancel my meeting with Alex on Jan 15 at 10 AM"
-5. **Reschedule meeting**: "Reschedule my meeting with Sarah from 2 PM to 3 PM next Friday"
-
-## Deployment to Azure App Service
-
-### 1. Build the Application
-
-```cmd
-mvn clean package -DskipTests
-```
-
-### 2. Deploy via Azure CLI
-
-In PowerShell (Azure CLI commands work the same on Windows):
-
-```powershell
-az webapp deploy `
-  --resource-group <resource-group> `
-  --name speech-calendar-app `
-  --type jar `
-  --src-path target/schedule-hub-1.0.0.jar
-```
-
-**Note:** Use backtick `` ` `` for line continuation in PowerShell. In Command Prompt, you can use `^` but PowerShell is recommended for Azure CLI.
-
-### 3. Configure App Settings
-
-```powershell
-az webapp config appsettings set `
-  --resource-group <resource-group> `
-  --name speech-calendar-app `
-  --settings `
-    AZURE_TENANT_ID="<tenant-id>" `
-    AZURE_CLIENT_ID="<client-id>" `
-    AZURE_CLIENT_SECRET="<client-secret>" `
-    AZURE_KEY_VAULT_URI="<key-vault-uri>" `
-    AZURE_SPEECH_KEY="<speech-key>" `
-    AZURE_SPEECH_REGION="eastus" `
-    AZURE_CLU_RESOURCE_NAME="<resource-name>" `
-    AZURE_CLU_KEY="<clu-key>" `
-    AZURE_CLU_PROJECT_NAME="ScheduleHub" `
-    AZURE_CLU_DEPLOYMENT_NAME="production" `
-    AZURE_CLU_API_VERSION="2022-05-01"
-```
-
-## Project Structure
-
-```
-schedulehub/
-├── src/
-│   ├── main/
-│   │   ├── java/com/bestbuy/schedulehub/
-│   │   │   ├── config/          # Configuration classes
-│   │   │   ├── controller/      # REST controllers
-│   │   │   ├── dto/             # Data transfer objects
-│   │   │   ├── service/         # Business logic services
-│   │   │   └── ScheduleHubApplication.java
-│   │   └── resources/
-│   │       ├── static/          # Frontend HTML/JS
-│   │       └── application.yml
-│   └── test/                    # Unit and integration tests
-├── pom.xml
-└── README.md
-```
+1. **Simple Schedule**: "Book Mary for 2 PM tomorrow"
+2. **Recurring Schedule**: "Book myTeam 3 PM to 4 PM every weekday"
+3. **Cancel meeting**: "Cancel my meeting with Alex on Jan 15 at 10 AM"
+4. **Reschedule meeting**: "Reschedule my meeting with Sarah from 2 PM to 3 PM next Friday"
 
 ## Troubleshooting
 
-### Speech Recognition Not Working
+### OpenAI API Errors
 
-- Verify Azure Speech Service key and region are correct
-- Check browser microphone permissions
-- Ensure HTTPS is used in production (required for microphone access)
+**401 Unauthorized:**
 
-### CLU Not Extracting Entities
+- Verify your OpenAI API key is correct in `application.yml`
+- Check that your API key hasn't expired
+- Ensure you have credits in your OpenAI account
 
-- Verify CLU project is deployed to production deployment
-- Check that example utterances are properly labeled
-- Review CLU response in application logs
-- Ensure project name and deployment name match configuration
+**Rate Limit Errors:**
+
+- OpenAI has rate limits based on your subscription tier
+- Consider using `gpt-4o-mini` for lower costs and higher rate limits
+- Add retry logic if needed
 
 ### Graph API Authentication Errors
 
 - Verify app registration has correct permissions
 - Ensure admin consent is granted
 - Check that client secret hasn't expired
+- Verify tenant-id, client-id, and client-secret in `application.yml`
 
-### Key Vault Access Denied
+### Intent Extraction Issues
 
-- Verify access policy includes your app registration
-- Check that managed identity is configured (if using)
+- Check application logs for detailed OpenAI responses
+- Verify the prompt in `OpenAIService.java` matches your needs
+- Try rephrasing your request if intent is not recognized
+
+## Deployment
+
+### Build for Production
+
+```cmd
+mvn clean package -DskipTests
+```
+
+### Environment Variables (Alternative to application.yml)
+
+You can also use environment variables:
+
+```cmd
+set AZURE_TENANT_ID=your-tenant-id
+set AZURE_CLIENT_ID=your-client-id
+set AZURE_CLIENT_SECRET=your-client-secret
+set OPENAI_API_KEY=your-openai-key
+```
+
+## Cost Considerations
+
+### OpenAI API Costs
+
+- **gpt-4o-mini**: ~$0.15 per 1M input tokens, ~$0.60 per 1M output tokens (very affordable)
+- **gpt-4o**: ~$2.50 per 1M input tokens, ~$10 per 1M output tokens
+- **gpt-3.5-turbo**: ~$0.50 per 1M input tokens, ~$1.50 per 1M output tokens
+
+For typical scheduling requests, costs are minimal (fractions of a cent per request).
 
 ## License
 
 This project is provided as-is for demonstration purposes.
 
+## Documentation
+
+- **[README.md](README.md)** - This file, main project documentation
+- **[DESIGN.md](DESIGN.md)** - Complete architecture and design documentation
+- **[QUICK_START.md](QUICK_START.md)** - Quick setup guide
+- **[AZURE_SETUP.md](AZURE_SETUP.md)** - Detailed Azure resource setup
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview and summary
+
 ## Support
 
-For issues and questions, please refer to:
+For issues and questions:
 
-- [Azure Speech Service Documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/)
-- [Microsoft Graph API Documentation](https://docs.microsoft.com/graph/)
-- [Azure CLU Documentation](https://learn.microsoft.com/azure/ai-services/language-service/conversational-language-understanding/overview)
+- Check application logs for detailed error messages
+- Review [OpenAI API Documentation](https://platform.openai.com/docs)
+- Review [Microsoft Graph API Documentation](https://docs.microsoft.com/graph/)
+- Verify all configuration values in `application.yml`
+- See [DESIGN.md](DESIGN.md) for architecture details
+- See [AZURE_SETUP.md](AZURE_SETUP.md) for Azure configuration help

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a complete Java Spring Boot application for a speech-driven Outlook Calendar Schedule assistant. The system allows users to schedule, cancel, and reschedule meetings in Microsoft Outlook Calendar using natural language speech input.
+This is a complete Java Spring Boot application for an AI-powered Outlook Calendar Schedule assistant. The system allows users to schedule, cancel, and reschedule meetings in Microsoft Outlook Calendar using natural language text input. The application uses OpenAI for natural language understanding and Microsoft Graph API for calendar operations.
 
 ## Project Structure
 
@@ -12,27 +12,24 @@ schedulehub/
 │   ├── main/
 │   │   ├── java/com/bestbuy/schedulehub/
 │   │   │   ├── config/                    # Configuration classes
-│   │   │   │   ├── AzureConfig.java       # Azure Key Vault & Identity config
+│   │   │   │   ├── AzureConfig.java       # Azure AD Identity config
 │   │   │   │   └── GraphApiConfig.java    # Microsoft Graph API config
 │   │   │   ├── controller/
 │   │   │   │   └── ScheduleController.java # REST API endpoints
 │   │   │   ├── dto/                       # Data transfer objects
 │   │   │   │   ├── ScheduleRequest.java
 │   │   │   │   ├── ScheduleResponse.java
-│   │   │   │   ├── ExtractedEntities.java
-│   │   │   │   └── CluIntent.java
+│   │   │   │   └── ExtractedEntities.java
 │   │   │   ├── service/                   # Business logic services
 │   │   │   │   ├── ScheduleService.java    # Main Schedule orchestration
 │   │   │   │   ├── GraphCalendarService.java # Graph API integration
-│   │   │   │   ├── KeyVaultService.java   # Key Vault integration
-│   │   │   │   └── CluService.java       # CLU NLP integration
+│   │   │   │   └── OpenAIService.java      # OpenAI NLP integration
 │   │   │   └── ScheduleHubApplication.java
 │   │   └── resources/
 │   │       ├── static/                    # Frontend files
 │   │       │   ├── index.html            # Web UI
-│   │       │   └── app.js                # Speech SDK integration
+│   │       │   └── app.js                # Frontend JavaScript
 │   │       └── application.yml          # Application configuration
-│   │       └── application.yml           # Alternative config
 │   └── test/
 │       ├── java/com/bestbuy/schedulehub/
 │       │   ├── controller/
@@ -40,34 +37,35 @@ schedulehub/
 │       │   ├── integration/
 │       │   │   └── ScheduleIntegrationTest.java
 │       │   └── service/
-│       │       ├── ScheduleServiceTest.java
-│       │       └── CluServiceTest.java
+│       │       └── ScheduleServiceTest.java
 │       └── resources/
-│           └── application-test.properties
+│           └── application-test.yml
 ├── pom.xml                                # Maven dependencies
 ├── .gitignore
 ├── README.md                              # Main documentation
+├── DESIGN.md                              # Architecture and design documentation
 ├── AZURE_SETUP.md                        # Azure resource setup guide
-├── CLU_CONFIGURATION.md                 # CLU model configuration
 ├── QUICK_START.md                        # Quick start guide
+├── FIXES.md                              # Known issues and fixes
 └── PROJECT_SUMMARY.md                    # This file
 ```
 
 ## Key Features
 
-### 1. Speech Recognition
+### 1. Text Input Interface
 
-- Web-based UI with microphone button
-- Azure Speech SDK integration
-- Real-time transcription
-- Browser-based (no server-side speech processing needed)
+- Simple web-based UI with text input
+- Real-time request processing
+- Clear response display with meeting details
+- No microphone or browser permissions required
 
 ### 2. Natural Language Understanding
 
-- Azure CLU (Conversational Language Understanding) integration
+- OpenAI GPT integration (default: gpt-4o-mini)
 - Intent extraction (BookMeeting, CancelMeeting, RescheduleMeeting)
 - Entity extraction (attendees, dates, times, recurrence, exceptions)
 - Handles complex natural language queries
+- No training or deployment required
 
 ### 3. Calendar Integration
 
@@ -81,13 +79,13 @@ schedulehub/
 ### 4. Security
 
 - Azure AD OAuth 2.0 authentication
-- Azure Key Vault for secret management
+- Configuration via application.yml (no Key Vault required)
 - Secure credential handling
 - Application-level permissions
 
 ### 5. Monitoring
 
-- Application Insights integration
+- Application Insights integration (optional)
 - Comprehensive logging
 - Error tracking
 - Performance monitoring
@@ -108,25 +106,21 @@ schedulehub/
 - **Maven** - Build tool
 - **Microsoft Graph SDK** - Calendar API
 - **Azure Identity** - Authentication
-- **Azure Key Vault SDK** - Secret management
-- **OkHttp** - HTTP client for CLU
+- **OkHttp** - HTTP client for OpenAI API
+- **Jackson** - JSON processing
 
 ### Frontend
 
 - **HTML5** - Markup
 - **JavaScript** - Client-side logic
-- **Azure Speech SDK (JavaScript)** - Speech recognition
 - **CSS3** - Styling
 
-### Azure Services
+### External Services
 
-- **Azure Speech Service** - Speech-to-text
-- **Azure CLU** - Conversational language understanding
+- **OpenAI API** - Natural language understanding (gpt-4o-mini)
 - **Microsoft Graph API** - Calendar operations
 - **Azure AD** - Authentication
-- **Azure Key Vault** - Secret storage
-- **Application Insights** - Monitoring
-- **Azure App Service** - Hosting (optional)
+- **Application Insights** - Monitoring (optional)
 
 ## API Endpoints
 
@@ -150,8 +144,8 @@ Processes natural language schedule requests.
   "message": "Meeting scheduled successfully",
   "eventId": "AAMkAGI2...",
   "eventSubject": "Meeting with Mary",
-  "startTime": "2024-01-16T14:00:00",
-  "endTime": "2024-01-16T15:00:00",
+  "startTime": "2025-12-10T14:00:00",
+  "endTime": "2025-12-10T15:00:00",
   "attendees": ["Mary"],
   "recurrencePattern": null,
   "exceptions": null
@@ -178,11 +172,29 @@ All test scenarios from requirements are implemented:
 
 Configure these values in `application.yml`:
 
-- Azure AD: `tenant-id`, `client-id`, `client-secret`
-- Azure Key Vault: `uri`
-- Azure Speech Service: `key`, `region`
-- Azure CLU: `endpoint`, `key`, `project-name`, `deployment-name`, `api-version`
-- Application Insights (optional): `instrumentation-key`, `connection-string`
+- **Azure AD**: `tenant-id`, `client-id`, `client-secret`
+- **OpenAI**: `api-key`, `model` (optional, defaults to gpt-4o-mini)
+- **Application Insights** (optional): `instrumentation-key`, `connection-string`
+
+### Example Configuration
+
+```yaml
+azure:
+  activedirectory:
+    tenant-id: your-tenant-id
+    client-id: your-client-id
+    client-secret: your-client-secret
+    authority: https://login.microsoftonline.com/your-tenant-id
+
+openai:
+  api-key: sk-your-openai-api-key-here
+  model: gpt-4o-mini
+
+microsoft:
+  graph:
+    scope: https://graph.microsoft.com/.default
+    endpoint: https://graph.microsoft.com/v1.0
+```
 
 ## Deployment
 
@@ -202,31 +214,52 @@ az webapp deploy --resource-group <rg> --name <app-name> --type jar --src-path t
 ## Documentation Files
 
 1. **README.md** - Complete project documentation
-2. **AZURE_SETUP.md** - Step-by-step Azure resource setup
-3. **CLU_CONFIGURATION.md** - CLU model configuration guide
+2. **DESIGN.md** - Architecture and design documentation
+3. **AZURE_SETUP.md** - Step-by-step Azure resource setup
 4. **QUICK_START.md** - Quick start guide for developers
 5. **PROJECT_SUMMARY.md** - This file
+6. **FIXES.md** - Known issues and fixes
+
+## Recent Changes
+
+### Migration from CLU to OpenAI
+
+The project was migrated from Azure CLU (Conversational Language Understanding) to OpenAI API:
+
+- **Easier Setup**: No training or deployment required
+- **Better Understanding**: Superior natural language understanding out of the box
+- **Faster Development**: No need to create intents, entities, and train models
+- **Cost Effective**: Very affordable with gpt-4o-mini (~$0.0001 per request)
+- **More Flexible**: Easy to adjust prompts and improve extraction
+
+### Simplified Configuration
+
+- Removed Azure Key Vault dependency
+- All configuration now in `application.yml`
+- Removed speech input (text-only interface)
+- Simplified frontend (no microphone/Speech SDK)
 
 ## Known Issues / Notes
 
-1. **pom.xml name tag**: There's a minor XML issue with `<n>` tag on line 18. It should be `<name>`. This doesn't affect functionality but should be fixed for proper Maven compliance.
+1. **pom.xml name tag**: Fixed in current version.
 
-2. **CLU Integration**: Uses direct HTTP calls to the CLU REST API for conversational language understanding, replacing the deprecated LUIS service.
+2. **OpenAI API**: Requires a valid API key and payment method. Very affordable with gpt-4o-mini.
 
-3. **Speech SDK**: The frontend uses Azure Speech SDK for JavaScript, which requires HTTPS in production for microphone access.
+3. **Graph API Permissions**: Requires admin consent for application permissions.
 
-4. **Graph API Permissions**: Requires admin consent for application permissions.
+4. **Removed Services**: `CluService` and `CluIntent` have been removed from the codebase as they are no longer needed after migrating to OpenAI.
 
 ## Next Steps / Enhancements
 
 1. **Multi-language support** - Add support for multiple languages
 2. **SMS/Email notifications** - Integrate Azure Communication Services
-3. **Voice feedback** - Add text-to-speech for confirmations
+3. **Voice input** - Add Azure Speech SDK for voice input (optional)
 4. **Meeting room Schedule** - Integrate room availability
 5. **Conflict detection** - Check for scheduling conflicts
 6. **Recurrence pattern improvements** - Better handling of complex patterns
 7. **User preferences** - Store user preferences and defaults
 8. **Analytics dashboard** - Usage analytics and insights
+9. **Key Vault integration** - Add Azure Key Vault for production secret management
 
 ## Support
 
@@ -234,13 +267,15 @@ For setup help:
 
 - See `QUICK_START.md` for quick setup
 - See `AZURE_SETUP.md` for detailed Azure configuration
-- See `CLU_CONFIGURATION.md` for CLU setup
+- See `README.md` for complete documentation
+- See `DESIGN.md` for architecture and design details
 
 For development:
 
 - Review test files for usage examples
 - Check service classes for implementation details
 - Review controller for API usage
+- See `DESIGN.md` for component design and data flow
 
 ## License
 

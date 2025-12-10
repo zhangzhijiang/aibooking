@@ -43,46 +43,6 @@
             font-size: 14px;
         }
 
-        .mic-container {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-        }
-
-        .mic-button {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mic-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .mic-button.recording {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
 
         .status {
             text-align: center;
@@ -181,42 +141,206 @@
             font-size: 14px;
             margin-bottom: 15px;
         }
+
+        .input-section {
+            margin: 30px 0;
+        }
+
+        .input-section label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #textInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        #textInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .output-section {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .output-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-section h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .output-content {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .booking-results-content {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        .booking-item {
+            background: #f0f7ff;
+            border-left: 3px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .booking-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .booking-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .booking-item .booking-field {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .booking-item .booking-field strong {
+            color: #333;
+            margin-right: 5px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎤 Schedule Hub</h1>
-        <p class="subtitle">Schedule meetings in Outlook Calendar using your voice</p>
+        <h1>📅 Schedule Hub</h1>
+        <p class="subtitle">Schedule meetings in Outlook Calendar using natural language</p>
 
         <div class="config-section">
-            <label for="apiUrl">API URL:</label>
-            <input type="text" id="apiUrl" value="http://localhost:8080/api" placeholder="http://localhost:8080/api">
-            
-            <label for="speechKey">Azure Speech Key:</label>
-            <input type="password" id="speechKey" placeholder="Enter your Azure Speech Service key">
-            
-            <label for="speechRegion">Azure Speech Region:</label>
-            <input type="text" id="speechRegion" placeholder="e.g., eastus" value="eastus">
+            <label for="userIdInput">User ID (Required):</label>
+            <input type="text" id="userIdInput" placeholder="user@domain.com or object-id (GUID)" value="" />
+            <p style="font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px;">
+                Enter the <strong>full email address</strong> (e.g., zhangzhijiang@yourdomain.com) or Azure AD Object ID (GUID format)
+            </p>
+            <p style="font-size: 11px; color: #d32f2f; margin-top: -10px; margin-bottom: 15px;">
+                ⚠️ Do NOT use just the username (e.g., "zhangzhijiang") - use the full email address
+            </p>
         </div>
 
-        <div class="mic-container">
-            <button class="mic-button" id="micButton" title="Click to start/stop recording">
-                🎤
-            </button>
+        <div class="input-section">
+            <label for="textInput">Enter your request:</label>
+            <div class="input-container">
+                <input type="text" id="textInput" placeholder="Type your request here (e.g., Book Mary for 2 PM tomorrow)" />
+                <button class="submit-button" id="submitButton" title="Submit request">📤</button>
+            </div>
         </div>
 
         <div class="status info" id="status">
-            Click the microphone to start recording
+            Enter your scheduling request above and click submit
         </div>
 
         <div class="transcription" id="transcription">
-            Your speech will appear here...
+            Your request will appear here...
         </div>
 
         <div class="response hidden" id="response"></div>
+
+        <!-- Debug/Troubleshooting Sections -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #667eea;">
+            <h2 style="color: #667eea; font-size: 18px; margin-bottom: 15px; text-align: center;">
+                🔍 Debug & Troubleshooting Information
+            </h2>
+            
+            <!-- OpenAI Output Section -->
+            <div class="output-section hidden" id="openaiOutput">
+                <h3>🤖 1. OpenAI Output (Parsed Request JSON)</h3>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                    This shows the JSON content extracted by OpenAI from your natural language request.
+                </p>
+                <pre id="openaiOutputContent" class="output-content">No data available</pre>
+            </div>
+
+            <!-- Graph API Input Section -->
+            <div class="output-section hidden" id="graphApiInput">
+                <h3>📤 2. Graph API Input (Event Parameters)</h3>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                    This shows the parameters being sent to Microsoft Graph API to create/update the calendar event.
+                </p>
+                <pre id="graphApiInputContent" class="output-content">No data available</pre>
+            </div>
+
+            <!-- Booking Results Section -->
+            <div class="output-section hidden" id="bookingResults">
+                <h3>📅 3. Calendar Booking Results</h3>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                    This shows the final result from the calendar booking operation, including event IDs and details.
+                </p>
+                <div id="bookingResultsContent" class="booking-results-content">
+                    <p style="color: #999; text-align: center; padding: 20px;">No booking results available</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <script src="app.js"></script>
 </body>
 </html>

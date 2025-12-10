@@ -3,7 +3,7 @@ package com.bestbuy.schedulehub.integration;
 import com.bestbuy.schedulehub.dto.ScheduleRequest;
 import com.bestbuy.schedulehub.dto.ScheduleResponse;
 import com.bestbuy.schedulehub.service.GraphCalendarService;
-import com.bestbuy.schedulehub.service.CluService;
+import com.bestbuy.schedulehub.service.OpenAIService;
 import com.bestbuy.schedulehub.dto.ExtractedEntities;
 import com.microsoft.graph.models.Event;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class ScheduleIntegrationTest {
         private TestRestTemplate restTemplate;
 
         @MockBean
-        private CluService cluService;
+        private OpenAIService openAIService;
 
         @MockBean
         private GraphCalendarService graphCalendarService;
@@ -58,7 +58,7 @@ class ScheduleIntegrationTest {
                                 .subject("Meeting with Mary")
                                 .build();
 
-                when(cluService.extractIntentAndEntities("Book Mary for 2 PM tomorrow"))
+                when(openAIService.extractIntentAndEntities("Book Mary for 2 PM tomorrow"))
                                 .thenReturn(entities);
                 when(graphCalendarService.createEvent(any(ExtractedEntities.class), anyString()))
                                 .thenReturn("event-123");
@@ -91,7 +91,7 @@ class ScheduleIntegrationTest {
                                 .subject("Team Sync")
                                 .build();
 
-                when(cluService.extractIntentAndEntities(
+                when(openAIService.extractIntentAndEntities(
                                 "Book myTeam 3 PM to 4 PM every weekday from Jan to Jul, except every second Tuesday"))
                                 .thenReturn(entities);
                 when(graphCalendarService.createEvent(any(ExtractedEntities.class), anyString()))
@@ -125,7 +125,7 @@ class ScheduleIntegrationTest {
                                 .subject("Team sync")
                                 .build();
 
-                when(cluService.extractIntentAndEntities(
+                when(openAIService.extractIntentAndEntities(
                                 "Schedule team sync 9 AM every weekday, but skip Monday in the first week and skip Tuesday/Thursday in the second week"))
                                 .thenReturn(entities);
                 when(graphCalendarService.createEvent(any(ExtractedEntities.class), anyString()))
@@ -160,7 +160,7 @@ class ScheduleIntegrationTest {
                 mockEvent.id = "event-999";
                 mockEvent.subject = "Meeting with Alex";
 
-                when(cluService.extractIntentAndEntities("Cancel my meeting with Alex on Jan 15 at 10 AM"))
+                when(openAIService.extractIntentAndEntities("Cancel my meeting with Alex on Jan 15 at 10 AM"))
                                 .thenReturn(entities);
                 when(graphCalendarService.findEvents(anyString(), any(), any(), anyString()))
                                 .thenReturn(Collections.singletonList(mockEvent));
@@ -193,7 +193,7 @@ class ScheduleIntegrationTest {
                 mockEvent.id = "event-111";
                 mockEvent.subject = "Meeting with Sarah";
 
-                when(cluService.extractIntentAndEntities(
+                when(openAIService.extractIntentAndEntities(
                                 "Reschedule my meeting with Sarah from 2 PM to 3 PM next Friday"))
                                 .thenReturn(entities);
                 when(graphCalendarService.findEvents(anyString(), any(), any(), anyString()))

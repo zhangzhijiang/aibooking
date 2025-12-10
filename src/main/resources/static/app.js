@@ -1,133 +1,5 @@
-// Azure Speech SDK Configuration
-let speechConfig = null;
-let recognizer = null;
-let isRecording = false;
-
 // API Configuration
-const API_URL =
-  document.getElementById("apiUrl").value || "http://localhost:8080/api";
-
-// Initialize Speech SDK
-async function initializeSpeechSDK() {
-  const speechKey = document.getElementById("speechKey").value;
-  const speechRegion = document.getElementById("speechRegion").value;
-
-  if (!speechKey || !speechRegion) {
-    updateStatus(
-      "Please configure Azure Speech Service key and region",
-      "error"
-    );
-    return false;
-  }
-
-  try {
-    const speechSdk = SpeechSDK;
-    const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
-    speechConfig = speechSdk.SpeechConfig.fromSubscription(
-      speechKey,
-      speechRegion
-    );
-    speechConfig.speechRecognitionLanguage = "en-US";
-
-    recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
-
-    recognizer.recognizing = (s, e) => {
-      if (e.result.text) {
-        document.getElementById("transcription").textContent =
-          e.result.text + "...";
-      }
-    };
-
-    recognizer.recognized = async (s, e) => {
-      if (e.result.reason === speechSdk.ResultReason.RecognizedSpeech) {
-        const text = e.result.text;
-        document.getElementById("transcription").textContent = text;
-        updateStatus("Processing your request...", "info");
-
-        // Send to backend API
-        await processScheduleRequest(text);
-      } else if (e.result.reason === speechSdk.ResultReason.NoMatch) {
-        updateStatus("No speech recognized. Please try again.", "error");
-      }
-    };
-
-    recognizer.canceled = (s, e) => {
-      updateStatus(`Recognition canceled: ${e.reason}`, "error");
-      if (e.reason === speechSdk.CancellationReason.Error) {
-        updateStatus(`Error details: ${e.errorDetails}`, "error");
-      }
-      stopRecording();
-    };
-
-    recognizer.sessionStopped = (s, e) => {
-      stopRecording();
-    };
-
-    return true;
-  } catch (error) {
-    console.error("Error initializing Speech SDK:", error);
-    updateStatus(
-      "Failed to initialize speech recognition. Please check your configuration.",
-      "error"
-    );
-    return false;
-  }
-}
-
-// Start/Stop Recording
-async function toggleRecording() {
-  if (!isRecording) {
-    const initialized = await initializeSpeechSDK();
-    if (!initialized) {
-      return;
-    }
-
-    try {
-      recognizer.startContinuousRecognitionAsync(
-        () => {
-          isRecording = true;
-          updateMicButton(true);
-          updateStatus("Listening... Speak now", "info");
-        },
-        (error) => {
-          console.error("Error starting recognition:", error);
-          updateStatus("Failed to start recording", "error");
-        }
-      );
-    } catch (error) {
-      console.error("Error starting recognition:", error);
-      updateStatus("Failed to start recording", "error");
-    }
-  } else {
-    stopRecording();
-  }
-}
-
-function stopRecording() {
-  if (recognizer) {
-    recognizer.stopContinuousRecognitionAsync(
-      () => {
-        isRecording = false;
-        updateMicButton(false);
-        updateStatus("Recording stopped", "info");
-      },
-      (error) => {
-        console.error("Error stopping recognition:", error);
-      }
-    );
-  }
-}
-
-function updateMicButton(recording) {
-  const button = document.getElementById("micButton");
-  if (recording) {
-    button.classList.add("recording");
-    button.textContent = "⏹️";
-  } else {
-    button.classList.remove("recording");
-    button.textContent = "🎤";
-  }
-}
+const API_URL = "http://localhost:8080/api";
 
 function updateStatus(message, type = "info") {
   const statusDiv = document.getElementById("status");
@@ -138,10 +10,19 @@ function updateStatus(message, type = "info") {
 // Process Schedule Request
 async function processScheduleRequest(text) {
   try {
+    // Get user ID from input field
+    const userId = document.getElementById("userIdInput").value.trim();
+    
+    if (!userId) {
+      updateStatus("Please enter a User ID (email or object ID)", "error");
+      return;
+    }
+
     const response = await fetch(`${API_URL}/scheduleMeeting`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-User-Id": userId,
       },
       body: JSON.stringify({ text: text }),
     });
@@ -158,6 +39,11 @@ async function processScheduleRequest(text) {
       "Failed to process schedule request: " + error.message,
       "error"
     );
+    
+    // Show debug sections even on error for troubleshooting
+    displayOpenAIOutput(null);
+    displayGraphAPIInput(null);
+    displayBookingResults(null);
   }
 }
 
@@ -214,19 +100,125 @@ function displayResponse(result) {
     responseDiv.innerHTML = `<h3>❌ Error</h3><div class="response-item">${result.message}</div>`;
     responseDiv.classList.remove("hidden");
   }
+
+  // Always display debug sections for troubleshooting
+  // Display OpenAI Output
+  displayOpenAIOutput(result.openaiOutput);
+
+  // Display Graph API Input
+  displayGraphAPIInput(result.graphApiInput);
+
+  // Display Booking Results
+  displayBookingResults(result.bookingResults);
+}
+
+function displayOpenAIOutput(openaiOutput) {
+  const section = document.getElementById("openaiOutput");
+  const content = document.getElementById("openaiOutputContent");
+
+  if (openaiOutput && Object.keys(openaiOutput).length > 0) {
+    content.textContent = JSON.stringify(openaiOutput, null, 2);
+    section.classList.remove("hidden");
+  } else {
+    content.textContent = "No OpenAI output data available";
+    section.classList.remove("hidden"); // Always show for debugging
+  }
+}
+
+function displayGraphAPIInput(graphApiInput) {
+  const section = document.getElementById("graphApiInput");
+  const content = document.getElementById("graphApiInputContent");
+
+  if (graphApiInput && Object.keys(graphApiInput).length > 0) {
+    content.textContent = JSON.stringify(graphApiInput, null, 2);
+    section.classList.remove("hidden");
+  } else {
+    content.textContent = "No Graph API input data available";
+    section.classList.remove("hidden"); // Always show for debugging
+  }
+}
+
+function displayBookingResults(bookingResults) {
+  const section = document.getElementById("bookingResults");
+  const content = document.getElementById("bookingResultsContent");
+
+  if (bookingResults && bookingResults.length > 0) {
+    let html = "";
+    bookingResults.forEach((booking, index) => {
+      html += `<div class="booking-item">`;
+      html += `<h4>Meeting ${index + 1}</h4>`;
+      
+      if (booking.eventId) {
+        html += `<div class="booking-field"><strong>Event ID:</strong> ${booking.eventId}</div>`;
+      }
+      
+      if (booking.subject) {
+        html += `<div class="booking-field"><strong>Subject:</strong> ${booking.subject}</div>`;
+      }
+      
+      if (booking.startTime) {
+        html += `<div class="booking-field"><strong>Start Time:</strong> ${new Date(booking.startTime).toLocaleString()}</div>`;
+      }
+      
+      if (booking.endTime) {
+        html += `<div class="booking-field"><strong>End Time:</strong> ${new Date(booking.endTime).toLocaleString()}</div>`;
+      }
+      
+      if (booking.attendees && booking.attendees.length > 0) {
+        html += `<div class="booking-field"><strong>Attendees:</strong> ${booking.attendees.join(", ")}</div>`;
+      }
+      
+      if (booking.location) {
+        html += `<div class="booking-field"><strong>Location:</strong> ${booking.location}</div>`;
+      }
+      
+      if (booking.recurrencePattern) {
+        html += `<div class="booking-field"><strong>Recurrence:</strong> ${booking.recurrencePattern}</div>`;
+      }
+      
+      if (booking.status) {
+        html += `<div class="booking-field"><strong>Status:</strong> <span style="color: green;">${booking.status}</span></div>`;
+      }
+      
+      html += `</div>`;
+    });
+    
+    content.innerHTML = html;
+    section.classList.remove("hidden");
+  } else {
+    // Always show section for debugging, even if empty
+    content.innerHTML = `<p style="color: #999; text-align: center; padding: 20px;">No booking results available. Check the error message above or review the Graph API input section.</p>`;
+    section.classList.remove("hidden");
+  }
+}
+
+// Handle text input submission
+function handleTextSubmit() {
+  const textInput = document.getElementById("textInput");
+  const text = textInput.value.trim();
+
+  if (!text) {
+    updateStatus("Please enter a request", "error");
+    return;
+  }
+
+  // Update transcription display
+  document.getElementById("transcription").textContent = text;
+  updateStatus("Processing your request...", "info");
+
+  // Process the request
+  processScheduleRequest(text);
+
+  // Clear the input
+  textInput.value = "";
 }
 
 // Event Listeners
-document.getElementById("micButton").addEventListener("click", toggleRecording);
+document.getElementById("submitButton").addEventListener("click", handleTextSubmit);
 
-// Update API URL when changed
-document.getElementById("apiUrl").addEventListener("change", (e) => {
-  API_URL = e.target.value;
-});
-
-// Handle page unload
-window.addEventListener("beforeunload", () => {
-  if (recognizer) {
-    recognizer.close();
+document.getElementById("textInput").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    handleTextSubmit();
   }
 });
+
