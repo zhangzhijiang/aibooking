@@ -68,25 +68,6 @@ public class AzureConfig {
         log.info("   - Can manage calendars for all users in tenant");
         log.info("   - Requires X-User-Id header in API requests");
         log.info("═══════════════════════════════════════════════════════════════");
-        log.info("");
-        log.info("🔍 Azure AD Configuration Verification Checklist:");
-        log.info("═══════════════════════════════════════════════════════════════");
-        log.info("1. Application Permissions Required:");
-        log.info("   ✅ Calendars.ReadWrite (Application permission)");
-        log.info("   ✅ User.Read.All (Application permission)");
-        log.info("");
-        log.info("2. Verify in Azure Portal:");
-        log.info("   → Azure AD → App registrations → {}", clientId);
-        log.info("   → API permissions → Check both permissions show:");
-        log.info("      - Type: Application");
-        log.info("      - Status: ✅ Granted for [your organization]");
-        log.info("");
-        log.info("3. If permissions not granted:");
-        log.info("   → Click 'Grant admin consent for [your organization]'");
-        log.info("");
-        log.info("4. Tenant ID: {}", tenantId);
-        log.info("   → Verify users belong to this tenant");
-        log.info("═══════════════════════════════════════════════════════════════");
     }
 
     @Bean
