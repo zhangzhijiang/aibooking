@@ -29,9 +29,9 @@ azure:
 # For standard OpenAI, remove endpoint and use API key starting with 'sk-'
 openai:
   api-key: # Required: Azure OpenAI API key (from Azure Portal)
-  model: gpt-5-chat # Deployment name in Azure OpenAI
-  endpoint: https://zhang-mizl1k4n-swedencentral.cognitiveservices.azure.com # Azure OpenAI endpoint
-  deployment-name: gpt-5-chat # Optional: Azure OpenAI deployment name (defaults to model if not specified)
+  model: # Deployment name in Azure OpenAI
+  endpoint: # Azure OpenAI endpoint
+  deployment-name: # Optional: Azure OpenAI deployment name (defaults to model if not specified)
   api-version: 2025-01-01-preview # Azure OpenAI API version (from deployment details)
 
 microsoft:
