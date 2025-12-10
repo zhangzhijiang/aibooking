@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: schedule-hub
+
+azure:
+  activedirectory:
+    # Azure AD credentials for Microsoft Graph API authentication
+    # This application uses APPLICATION PERMISSIONS (service-driven architecture)
+    # The app acts as a service principal and can manage calendars for all users
+    tenant-id: 4c626fb1-0203-4c28-bd18-e451f44d0048 #your-tenant-id
+    client-id: a8445943-d967-4c1f-9701-4e167c999eb4 #your-client-id
+    client-secret: cbM8Q~h6A8W3PN4ld0_InO34JgY8ZF9zo72I1dj8 # Required: Client secret for application authentication
+    authority: https://login.microsoftonline.com/4c626fb1-0203-4c28-bd18-e451f44d0048
+    # Authentication mode: application (Client Credentials Flow)
+    # - Uses client-secret, no user interaction required
+    # - Acts as service principal with application permissions
+    # - Can manage calendars for any user in the tenant
+    authentication-mode: application
+  application-insights:
+    # Optional: Azure Application Insights for monitoring
+    instrumentation-key: # Optional: your-instrumentation-key
+    connection-string: # Optional: your-connection-string
+
+# OpenAI Configuration - Required for intent and entity extraction
+# Using Azure OpenAI (set endpoint and deployment-name)
+# For standard OpenAI, remove endpoint and use API key starting with 'sk-'
+openai:
+  api-key: 70rgWdUflmDMGfcRTrbj6O7PAkA0D5ll4VRR47GoOgGFmTK722faJQQJ99BLACfhMk5XJ3w3AAAAACOG3Nzr # Required: Azure OpenAI API key (from Azure Portal)
+  model: gpt-5-chat # Deployment name in Azure OpenAI
+  endpoint: https://zhang-mizl1k4n-swedencentral.cognitiveservices.azure.com # Azure OpenAI endpoint
+  deployment-name: gpt-5-chat # Optional: Azure OpenAI deployment name (defaults to model if not specified)
+  api-version: 2025-01-01-preview # Azure OpenAI API version (from deployment details)
+
+microsoft:
+  graph:
+    # Scope for application authentication (service principal permissions)
+    # For delegated authentication, use: https://graph.microsoft.com/Calendars.ReadWrite https://graph.microsoft.com/User.Read
+    scope: https://graph.microsoft.com/.default
+    endpoint: https://graph.microsoft.com/v1.0
+
+logging:
+  level:
+    com.bestbuy.schedulehub: INFO
+    com.microsoft.graph: DEBUG
+    com.azure: DEBUG
